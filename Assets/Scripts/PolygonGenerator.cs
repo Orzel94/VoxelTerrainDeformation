@@ -34,6 +34,8 @@ public class PolygonGenerator : MonoBehaviour
 
     private MeshCollider col;
 
+    public bool update = false;
+
 
     // Start is called before the first frame update
     void Start()
@@ -50,7 +52,12 @@ public class PolygonGenerator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (update)
+        {
+            BuildMesh();
+            UpdateMesh();
+            update = false;
+        }
     }
 
     void UpdateMesh()
