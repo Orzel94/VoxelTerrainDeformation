@@ -17,25 +17,29 @@ public class Chunk : MonoBehaviour
     private MeshCollider col;
 
     private int faceCount;
+
+    public GameObject worldGO;
+    private World world;
+
+    public int chunkSize = 16;
+
+    public int chunkX;
+    public int chunkY;
+    public int chunkZ;
     // Start is called before the first frame update
     void Start()
     {
         mesh = GetComponent<MeshFilter>().mesh;
         col = GetComponent<MeshCollider>();
+        world = worldGO.GetComponent("World") as World;
 
-        CubeTop(0, 0, 0, 0);
-        CubeNorth(0, 0, 0, 0);
-        CubeEast(0, 0, 0, 0);
-        CubeSouth(0, 0, 0, 0);
-        CubeWest(0, 0, 0, 0);
-        CubeBot(0, 0, 0, 0);
-        UpdateMesh();
+        GenerateMesh();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     void UpdateMesh()
@@ -55,6 +59,76 @@ public class Chunk : MonoBehaviour
         newTriangles.Clear();
 
         faceCount = 0;
+    }
+
+    byte Block(int x, int y, int z)
+    {
+        return world.Block(x + chunkX, y + chunkY, z + chunkZ); // Don't replace the world.Block in this line!
+    }
+
+    void GenerateMesh()
+    {
+
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int y = 0; y < chunkSize; y++)
+            {
+                for (int z = 0; z < chunkSize; z++)
+                {
+                    //This code will run for every block in the chunk
+
+                    if (Block(x, y, z) != 0)
+                    {
+                        //If the block is solid
+
+                        if (Block(x, y + 1, z) == 0)
+                        {
+                            //Block above is air
+                            CubeTop(x, y, z, Block(x, y, z));
+                        }
+
+                        if (Block(x, y - 1, z) == 0)
+                        {
+                            //Block below is air
+                            CubeBot(x, y, z, Block(x, y, z));
+
+                        }
+
+                        if (Block(x + 1, y, z) == 0)
+                        {
+                            //Block east is air
+                            CubeEast(x, y, z, Block(x, y, z));
+
+                        }
+
+                        if (Block(x - 1, y, z) == 0)
+                        {
+                            //Block west is air
+                            CubeWest(x, y, z, Block(x, y, z));
+
+                        }
+
+                        if (Block(x, y, z + 1) == 0)
+                        {
+                            //Block north is air
+                            CubeNorth(x, y, z, Block(x, y, z));
+
+                        }
+
+                        if (Block(x, y, z - 1) == 0)
+                        {
+                            //Block south is air
+                            CubeSouth(x, y, z, Block(x, y, z));
+
+                        }
+
+                    }
+
+                }
+            }
+        }
+
+        UpdateMesh();
     }
 
     void Cube(Vector2 texturePos)
