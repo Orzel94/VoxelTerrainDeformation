@@ -1,5 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using CoherentNoise.Generation;
+using CoherentNoise.Generation.Displacement;
+using CoherentNoise.Generation.Fractal;
+using CoherentNoise.Generation.Modification;
+using CoherentNoise.Generation.Patterns;
+using CoherentNoise.Texturing;
 using UnityEngine;
 
 public class World : MonoBehaviour
@@ -9,12 +15,19 @@ public class World : MonoBehaviour
     public int worldY = 16;
     public int worldZ = 16;
 
+    public RidgeNoise Noise;
+
     public GameObject chunk;
     public GameObject[,,] chunks;
     public int chunkSize = 16;
     // Start is called before the first frame update
     void Start()
     {
+        Noise = new RidgeNoise(1);
+        Noise.Exponent = 2;
+        Noise.Gain = 1.2f;
+        Noise.Offset = 0.7f;
+
         data = new byte[worldX, worldY, worldZ];
 
         for (int x = 0; x < worldX; x++)
@@ -78,7 +91,9 @@ public class World : MonoBehaviour
     int PerlinNoise(int x, int y, int z, float scale, float height, float power)
     {
         float rValue;
-        rValue = Noise.GetNoise(((double)x) / scale, ((double)y) / scale, ((double)z) / scale);
+
+        rValue = Noise.GetValue(((float)x) / scale, ((float)y) / scale, ((float)z) / scale);
+        //rValue = Noise.GetValue(((float)x), ((float)y), ((float)z));
         rValue *= height;
 
         if (power != 0)
