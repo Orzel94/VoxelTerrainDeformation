@@ -11,12 +11,14 @@ using UnityEngine;
 public class World : MonoBehaviour
 {
     public byte[,,] data;
-    public int worldX = 16;
-    public int worldY = 16;
-    public int worldZ = 16;
+    public int worldX;
+    public int worldY;
+    public int worldZ;
 
     public RidgeNoise Noise;
     //public BillowNoise Noise;
+    public Bias BiasObj;
+    public Gain GainObj;
 
     public float exp;
     public float gain;
@@ -34,15 +36,18 @@ public class World : MonoBehaviour
         Noise.Offset = offset;// 0.7f;
         //Noise = new BillowNoise(4);
 
+        BiasObj = new Bias(Noise, -0.2f);
+        GainObj = new Gain(BiasObj, -0.2f);
+        
         data = new byte[worldX, worldY, worldZ];
 
         for (int x = 0; x < worldX; x++)
         {
             for (int z = 0; z < worldZ; z++)
             {
-                int stone = PerlinNoise(x, 0, z, 10, 6, 4.2f);
+                int stone = PerlinNoise(x, 0, z, 10, worldY, 4.2f);
                 //stone += PerlinNoise(x, 300, z, 20, 4, 1.5f) + 10;
-                int dirt = PerlinNoise(x, 100, z, 50, 2, 0) + 1; //Added +1 to make sure minimum grass height is 1
+                int dirt = PerlinNoise(x, 100, z, 50, worldY, 0) + 1; //Added +1 to make sure minimum grass height is 1
                 //Debug.Log($"stone: {stone} , x: {x}, z: {z}");
                 for (int y = 0; y < worldY; y++)
                 {
@@ -103,7 +108,9 @@ public class World : MonoBehaviour
         float rValue;
 
         //rValue = Noise.GetValue(((float)x) / scale, ((float)y) / scale, ((float)z) / scale);
-        rValue = Noise.GetValue(((float)x), ((float)y), ((float)z));
+        //rValue = Noise.GetValue(((float)x), ((float)y), ((float)z));
+        //rValue = BiasObj.GetValue(((float)x), ((float)y), ((float)z));
+        rValue = GainObj.GetValue(((float)x/50), ((float)y/50), ((float)z/50));
         if (rValue<0)
         {
             rValue = -rValue;
@@ -112,7 +119,7 @@ public class World : MonoBehaviour
 
         if (power != 0)
         {
-            rValue = Mathf.Pow(rValue, power);
+            //rValue = Mathf.Pow(rValue, power);
         }
 
         return (int)rValue;
