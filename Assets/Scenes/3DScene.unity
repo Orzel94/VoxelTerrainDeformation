@@ -323,9 +323,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcecfcde3c6b8be4abd70e915387a107, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  worldX: 64
-  worldY: 16
-  worldZ: 64
+  worldX: 256
+  worldY: 32
+  worldZ: 256
+  exp: 2.72
+  gain: 1.2
+  offset: 0.58
   chunk: {fileID: 413478663061862758, guid: 21c15ec5cc7a9fc42a4c04d79a0f2f21, type: 3}
   chunkSize: 16
 --- !u!4 &1624094804

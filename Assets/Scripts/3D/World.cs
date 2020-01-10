@@ -16,6 +16,11 @@ public class World : MonoBehaviour
     public int worldZ = 16;
 
     public RidgeNoise Noise;
+    //public BillowNoise Noise;
+
+    public float exp;
+    public float gain;
+    public float offset;
 
     public GameObject chunk;
     public GameObject[,,] chunks;
@@ -24,9 +29,10 @@ public class World : MonoBehaviour
     void Start()
     {
         Noise = new RidgeNoise(1);
-        Noise.Exponent = 2;
-        Noise.Gain = 1.2f;
-        Noise.Offset = 0.7f;
+        Noise.Exponent = exp;// 1.0f;
+        Noise.Gain = gain;// 1.2f;
+        Noise.Offset = offset;// 0.7f;
+        //Noise = new BillowNoise(4);
 
         data = new byte[worldX, worldY, worldZ];
 
@@ -34,10 +40,10 @@ public class World : MonoBehaviour
         {
             for (int z = 0; z < worldZ; z++)
             {
-                int stone = PerlinNoise(x, 0, z, 10, 3, 1.2f);
-                stone += PerlinNoise(x, 300, z, 20, 4, 0) + 10;
+                int stone = PerlinNoise(x, 0, z, 10, 6, 4.2f);
+                //stone += PerlinNoise(x, 300, z, 20, 4, 1.5f) + 10;
                 int dirt = PerlinNoise(x, 100, z, 50, 2, 0) + 1; //Added +1 to make sure minimum grass height is 1
-
+                //Debug.Log($"stone: {stone} , x: {x}, z: {z}");
                 for (int y = 0; y < worldY; y++)
                 {
                     if (y <= stone)
@@ -47,6 +53,10 @@ public class World : MonoBehaviour
                     else if (y <= dirt + stone)
                     { 
                         data[x, y, z] = 2;
+                    }
+                    else if (y==0)
+                    {
+                        data[x, y, z] = 1;
                     }
 
                 }
@@ -92,8 +102,12 @@ public class World : MonoBehaviour
     {
         float rValue;
 
-        rValue = Noise.GetValue(((float)x) / scale, ((float)y) / scale, ((float)z) / scale);
-        //rValue = Noise.GetValue(((float)x), ((float)y), ((float)z));
+        //rValue = Noise.GetValue(((float)x) / scale, ((float)y) / scale, ((float)z) / scale);
+        rValue = Noise.GetValue(((float)x), ((float)y), ((float)z));
+        if (rValue<0)
+        {
+            rValue = -rValue;
+        }
         rValue *= height;
 
         if (power != 0)
@@ -112,6 +126,15 @@ public class World : MonoBehaviour
             return (byte)1;
         }
 
-        return data[x, y, z];
+        try
+        {
+            return data[x, y, z];
+        }
+        catch (System.Exception)
+        {
+
+            return 0;
+        }
+        
     }
 }
