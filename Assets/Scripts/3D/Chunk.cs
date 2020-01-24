@@ -26,6 +26,11 @@ public class Chunk : MonoBehaviour
     public int chunkX;
     public int chunkY;
     public int chunkZ;
+
+    private Vector2 tGrassTop = new Vector2(2, 1);
+
+    public bool update;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -156,9 +161,16 @@ public class Chunk : MonoBehaviour
         newVertices.Add(new Vector3(x + 1, y, z));
         newVertices.Add(new Vector3(x, y, z));
 
-        Vector2 texturePos;
+        Vector2 texturePos = new Vector2(0, 0);
 
-        texturePos = tStone;
+        if (Block(x, y, z) == 1)
+        {
+            texturePos = tStone;
+        }
+        else if (Block(x, y, z) == 2)
+        {
+            texturePos = tGrassTop;
+        }
 
         Cube(texturePos);
     }
@@ -170,9 +182,16 @@ public class Chunk : MonoBehaviour
         newVertices.Add(new Vector3(x, y, z + 1));
         newVertices.Add(new Vector3(x, y - 1, z + 1));
 
-        Vector2 texturePos;
+        Vector2 texturePos = new Vector2(0, 0);
 
-        texturePos = tStone;
+        if (Block(x, y, z) == 1)
+        {
+            texturePos = tStone;
+        }
+        else if (Block(x, y, z) == 2)
+        {
+            texturePos = tGrassTop;
+        }
 
         Cube(texturePos);
     }
@@ -184,9 +203,16 @@ public class Chunk : MonoBehaviour
         newVertices.Add(new Vector3(x + 1, y, z + 1));
         newVertices.Add(new Vector3(x + 1, y - 1, z + 1));
 
-        Vector2 texturePos;
+        Vector2 texturePos = new Vector2(0, 0);
 
-        texturePos = tStone;
+        if (Block(x, y, z) == 1)
+        {
+            texturePos = tStone;
+        }
+        else if (Block(x, y, z) == 2)
+        {
+            texturePos = tGrassTop;
+        }
 
         Cube(texturePos);
     }
@@ -198,9 +224,16 @@ public class Chunk : MonoBehaviour
         newVertices.Add(new Vector3(x + 1, y, z));
         newVertices.Add(new Vector3(x + 1, y - 1, z));
 
-        Vector2 texturePos;
+        Vector2 texturePos = new Vector2(0, 0);
 
-        texturePos = tStone;
+        if (Block(x, y, z) == 1)
+        {
+            texturePos = tStone;
+        }
+        else if (Block(x, y, z) == 2)
+        {
+            texturePos = tGrassTop;
+        }
 
         Cube(texturePos);
     }
@@ -212,9 +245,16 @@ public class Chunk : MonoBehaviour
         newVertices.Add(new Vector3(x, y, z));
         newVertices.Add(new Vector3(x, y - 1, z));
 
-        Vector2 texturePos;
+        Vector2 texturePos = new Vector2(0, 0);
 
-        texturePos = tStone;
+        if (Block(x, y, z) == 1)
+        {
+            texturePos = tStone;
+        }
+        else if (Block(x, y, z) == 2)
+        {
+            texturePos = tGrassTop;
+        }
 
         Cube(texturePos);
     }
