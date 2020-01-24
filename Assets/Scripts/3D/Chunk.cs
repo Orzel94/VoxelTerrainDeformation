@@ -71,7 +71,7 @@ public class Chunk : MonoBehaviour
         return world.Block(x + chunkX, y + chunkY, z + chunkZ); // Don't replace the world.Block in this line!
     }
 
-    void GenerateMesh()
+    public void GenerateMesh()
     {
 
         for (int x = 0; x < chunkSize; x++)

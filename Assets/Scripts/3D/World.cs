@@ -25,7 +25,7 @@ public class World : MonoBehaviour
     public float offset;
 
     public GameObject chunk;
-    public GameObject[,,] chunks;
+    public Chunk[,,] chunks;  //Changed from public GameObject[,,] chunks;
     public int chunkSize = 16;
     // Start is called before the first frame update
     void Start()
@@ -68,9 +68,8 @@ public class World : MonoBehaviour
             }
         }
 
-        chunks = new GameObject[Mathf.FloorToInt(worldX / chunkSize),
-                                Mathf.FloorToInt(worldY / chunkSize),
-                                Mathf.FloorToInt(worldZ / chunkSize)];
+        chunks = new Chunk[Mathf.FloorToInt(worldX / chunkSize),
+Mathf.FloorToInt(worldY / chunkSize), Mathf.FloorToInt(worldZ / chunkSize)];
 
         for (int x = 0; x < chunks.GetLength(0); x++)
         {
@@ -79,17 +78,18 @@ public class World : MonoBehaviour
                 for (int z = 0; z < chunks.GetLength(2); z++)
                 {
 
-                    chunks[x, y, z] = Instantiate(chunk,
-                     new Vector3(x * chunkSize, y * chunkSize, z * chunkSize),
-                     new Quaternion(0, 0, 0, 0)) as GameObject;
+                    //Create a temporary Gameobject for the new chunk instead of using chunks[x,y,z]
+                    GameObject newChunk = Instantiate(chunk, new Vector3(x * chunkSize - 0.5f,
+                     y * chunkSize + 0.5f, z * chunkSize - 0.5f), new Quaternion(0, 0, 0, 0)) as GameObject;
 
-                    Chunk newChunkScript = chunks[x, y, z].GetComponent("Chunk") as Chunk;
-
-                    newChunkScript.worldGO = gameObject;
-                    newChunkScript.chunkSize = chunkSize;
-                    newChunkScript.chunkX = x * chunkSize;
-                    newChunkScript.chunkY = y * chunkSize;
-                    newChunkScript.chunkZ = z * chunkSize;
+                    //Now instead of using a temporary variable for the script assign it
+                    //to chunks[x,y,z] and use it instead of the old \"newChunkScript\" 
+                    chunks[x, y, z] = newChunk.GetComponent("Chunk") as Chunk;
+                    chunks[x, y, z].worldGO = gameObject;
+                    chunks[x, y, z].chunkSize = chunkSize;
+                    chunks[x, y, z].chunkX = x * chunkSize;
+                    chunks[x, y, z].chunkY = y * chunkSize;
+                    chunks[x, y, z].chunkZ = z * chunkSize;
 
                 }
             }
