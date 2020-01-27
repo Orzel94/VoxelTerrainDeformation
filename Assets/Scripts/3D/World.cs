@@ -27,6 +27,7 @@ public class World : MonoBehaviour
     public GameObject chunk;
     public Chunk[,,] chunks;  //Changed from public GameObject[,,] chunks;
     public int chunkSize = 16;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -45,9 +46,9 @@ public class World : MonoBehaviour
         {
             for (int z = 0; z < worldZ; z++)
             {
-                int stone = PerlinNoise(x, 0, z, 10, worldY, 4.2f);
+                int stone = PerlinNoise(x, 0, z, 200, worldY, 4.2f);
                 //stone += PerlinNoise(x, 300, z, 20, 4, 1.5f) + 10;
-                int dirt = PerlinNoise(x, 100, z, 50, worldY, 0) + 1; //Added +1 to make sure minimum grass height is 1
+                int dirt = PerlinNoise(x, 100, z, 200, worldY, 0) + 1; //Added +1 to make sure minimum grass height is 1
                 //Debug.Log($"stone: {stone} , x: {x}, z: {z}");
                 for (int y = 0; y < worldY; y++)
                 {
@@ -110,7 +111,7 @@ Mathf.FloorToInt(worldY / chunkSize), Mathf.FloorToInt(worldZ / chunkSize)];
         //rValue = Noise.GetValue(((float)x) / scale, ((float)y) / scale, ((float)z) / scale);
         //rValue = Noise.GetValue(((float)x), ((float)y), ((float)z));
         //rValue = BiasObj.GetValue(((float)x), ((float)y), ((float)z));
-        rValue = GainObj.GetValue(((float)x/50), ((float)y/50), ((float)z/50));
+        rValue = GainObj.GetValue(((float)x/scale), ((float)y/50), ((float)z/scale));
         if (rValue<0)
         {
             rValue = -rValue;

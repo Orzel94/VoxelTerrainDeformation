@@ -326,9 +326,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcecfcde3c6b8be4abd70e915387a107, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  worldX: 256
-  worldY: 32
-  worldZ: 256
+  worldX: 1024
+  worldY: 128
+  worldZ: 1024
   exp: 2.72
   gain: 1.2
   offset: 0.58
