@@ -10,10 +10,11 @@ using UnityEngine;
 
 public class World : MonoBehaviour
 {
-    public byte[,,] data;
+    //public byte[,,] data;
     public int worldX;
     public int worldY;
     public int worldZ;
+    public int worldYMultiplier = 2;
 
     public RidgeNoise Noise;
     //public BillowNoise Noise;
@@ -28,6 +29,9 @@ public class World : MonoBehaviour
     public Chunk[,,] chunks;  //Changed from public GameObject[,,] chunks;
     public int chunkSize = 16;
 
+    [Tooltip("size of siungle voxel - value must be power of 2")]
+    public float voxelScale;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -39,42 +43,14 @@ public class World : MonoBehaviour
 
         BiasObj = new Bias(Noise, -0.2f);
         GainObj = new Gain(BiasObj, -0.2f);
-        
-        data = new byte[worldX, worldY, worldZ];
 
-        for (int x = 0; x < worldX; x++)
-        {
-            for (int z = 0; z < worldZ; z++)
-            {
-                int stone = PerlinNoise(x, 0, z, 200, worldY, 4.2f);
-                //stone += PerlinNoise(x, 300, z, 20, 4, 1.5f) + 10;
-                int dirt = PerlinNoise(x, 100, z, 200, worldY, 0) + 1; //Added +1 to make sure minimum grass height is 1
-                //Debug.Log($"stone: {stone} , x: {x}, z: {z}");
-                for (int y = 0; y < worldY; y++)
-                {
-                    if (y <= stone)
-                    {
-                        data[x, y, z] = 1;
-                    }
-                    else if (y <= dirt + stone)
-                    { 
-                        data[x, y, z] = 2;
-                    }
-                    else if (y==0)
-                    {
-                        data[x, y, z] = 1;
-                    }
-
-                }
-            }
-        }
 
         chunks = new Chunk[Mathf.FloorToInt(worldX / chunkSize),
-Mathf.FloorToInt(worldY / chunkSize), Mathf.FloorToInt(worldZ / chunkSize)];
+Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
 
         for (int x = 0; x < chunks.GetLength(0); x++)
         {
-            for (int y = 0; y < chunks.GetLength(1); y++)
+            for (int y = 0; y < 1; y++)
             {
                 for (int z = 0; z < chunks.GetLength(2); z++)
                 {
@@ -91,6 +67,8 @@ Mathf.FloorToInt(worldY / chunkSize), Mathf.FloorToInt(worldZ / chunkSize)];
                     chunks[x, y, z].chunkX = x * chunkSize;
                     chunks[x, y, z].chunkY = y * chunkSize;
                     chunks[x, y, z].chunkZ = z * chunkSize;
+                    chunks[x, y, z].voxelScale = voxelScale;
+                    //chunks[x, y, z].GenerateTerrain();
 
                 }
             }
@@ -104,45 +82,52 @@ Mathf.FloorToInt(worldY / chunkSize), Mathf.FloorToInt(worldZ / chunkSize)];
 
     }
 
-    int PerlinNoise(int x, int y, int z, float scale, float height, float power)
+    public int PerlinNoise(int x, int y, int z, float scale, float height, float power)
     {
         float rValue;
 
         //rValue = Noise.GetValue(((float)x) / scale, ((float)y) / scale, ((float)z) / scale);
         //rValue = Noise.GetValue(((float)x), ((float)y), ((float)z));
         //rValue = BiasObj.GetValue(((float)x), ((float)y), ((float)z));
-        rValue = GainObj.GetValue(((float)x/scale), ((float)y/50), ((float)z/scale));
-        if (rValue<0)
+        try
         {
-            rValue = -rValue;
-        }
-        rValue *= height;
+            rValue = GainObj.GetValue(((float)x / scale), ((float)y / 50), ((float)z / scale));
+            if (rValue < 0)
+            {
+                rValue = -rValue;
+            }
+            rValue *= height;
 
-        if (power != 0)
+            if (power != 0)
+            {
+                //rValue = Mathf.Pow(rValue, power);
+            }
+        }
+        catch (System.Exception ex)
         {
-            //rValue = Mathf.Pow(rValue, power);
-        }
 
+            throw;
+        }
         return (int)rValue;
     }
 
-    public byte Block(int x, int y, int z)
-    {
+    //public byte Block(int x, int y, int z)
+    //{
 
-        if (x >= worldX || x < 0 || y >= worldY || y < 0 || z >= worldZ || z < 0)
-        {
-            return (byte)1;
-        }
+    //    if (x/ voxelScale >= worldX || x/ voxelScale < 0 || y/ voxelScale >= worldY || y/ voxelScale < 0 || z/ voxelScale >= worldZ || z/ voxelScale < 0)
+    //    {
+    //        return (byte)1;
+    //    }
 
-        try
-        {
-            return data[x, y, z];
-        }
-        catch (System.Exception)
-        {
+    //    try
+    //    {
+    //        return data[x, y, z];
+    //    }
+    //    catch (System.Exception ex)
+    //    {
 
-            return 0;
-        }
-        
-    }
+    //        return 0;
+    //    }
+
+    //}
 }

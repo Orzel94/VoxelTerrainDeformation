@@ -1,6 +1,22 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
+
+public class Voxel
+{
+    public float x { get; set; }
+    public float y { get; set; }
+    public float z { get; set; }
+    public VoxelTypeEnum type { get; set; }
+}
+
+public enum VoxelTypeEnum
+{
+    AIR = 0,
+    STONE = 1,
+    GRASS = 2
+}
 
 public class Chunk : MonoBehaviour
 {
@@ -21,7 +37,7 @@ public class Chunk : MonoBehaviour
     public GameObject worldGO;
     private World world;
 
-    public int chunkSize = 16;
+    public int chunkSize;
 
     public int chunkX;
     public int chunkY;
@@ -31,6 +47,9 @@ public class Chunk : MonoBehaviour
 
     public bool update;
 
+    private Voxel[,,] voxels;
+    public float voxelScale;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -38,7 +57,7 @@ public class Chunk : MonoBehaviour
         col = GetComponent<MeshCollider>();
         world = worldGO.GetComponent("World") as World;
 
-        GenerateMesh();
+        GenerateTerrain();
     }
 
     // Update is called once per frame
@@ -66,71 +85,162 @@ public class Chunk : MonoBehaviour
         faceCount = 0;
     }
 
-    byte Block(int x, int y, int z)
+    Voxel Block(int x, int y, int z)
     {
-        return world.Block(x + chunkX, y + chunkY, z + chunkZ); // Don't replace the world.Block in this line!
+        try
+        {
+            return voxels[x, y, z];
+        }
+        catch (Exception ex)
+        {
+            var vo = new Voxel();
+            vo.type = VoxelTypeEnum.AIR;
+            return vo;
+        }
+
+        //return world.Block(x + chunkX, y + chunkY, z + chunkZ); // Don't replace the world.Block in this line!
     }
 
-    public void GenerateMesh()
+    public void GenerateTerrain()
     {
-
-        for (int x = 0; x < chunkSize; x++)
+        voxels = new Voxel[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), /** worldYMultiplier,*/ (int)(chunkSize / world.voxelScale)];
+        for (int x = 0; x < (int)(chunkSize / world.voxelScale); x++)
         {
-            for (int y = 0; y < chunkSize; y++)
+            for (int z = 0; z < (int)(chunkSize / world.voxelScale); z++)
             {
-                for (int z = 0; z < chunkSize; z++)
+                int stone = world.PerlinNoise(chunkX+ x, 0,chunkZ+ z, 200, (int)(world.worldY / world.voxelScale) /** world.worldYMultiplier*/, 4.2f);// + (int)(world.worldY / world.voxelScale);
+                //stone += PerlinNoise(x, 300, z, 20, 4, 1.5f) + 10;
+                int dirt = world.PerlinNoise(chunkX + x, 100, chunkZ + z, 200, world.worldY, 0) + 1;// + (int)(world.worldY / world.voxelScale); //Added +1 to make sure minimum grass height is 1
+                //Debug.Log($"stone: {stone} , x: {x}, z: {z}");
+                //for (int y = (int)(worldY / voxelScale); y < (int)(worldY / voxelScale) * worldYMultiplier; y++)
+                for (int y = 0; y < (int)(world.worldY / world.voxelScale); y++)
                 {
-                    //This code will run for every block in the chunk
-
-                    if (Block(x, y, z) != 0)
+                    try
                     {
-                        //If the block is solid
-
-                        if (Block(x, y + 1, z) == 0)
+                        Voxel tmpVox = new Voxel();
+                        if (y <= stone)
                         {
-                            //Block above is air
-                            CubeTop(x, y, z, Block(x, y, z));
+                            tmpVox.x = chunkX + x * world.voxelScale;
+                            tmpVox.y = chunkY + y * world.voxelScale;
+                            tmpVox.z = chunkZ + z * world.voxelScale;
+                            tmpVox.type = VoxelTypeEnum.STONE;
+                            voxels[x, y, z] = tmpVox;
+                        }
+                        else if (y <= dirt + stone)
+                        {
+                            tmpVox.x = chunkX + x * world.voxelScale;
+                            tmpVox.y = chunkY + y * world.voxelScale;
+                            tmpVox.z = chunkZ + z * world.voxelScale;
+                            tmpVox.type = VoxelTypeEnum.GRASS;
+                            voxels[x, y, z] = tmpVox;
+                        }
+                        else if (y == 0)
+                        {
+                            tmpVox.x = chunkX + x * world.voxelScale;
+                            tmpVox.y = chunkY + y * world.voxelScale;
+                            tmpVox.z = chunkZ + z * world.voxelScale;
+                            tmpVox.type = VoxelTypeEnum.STONE;
+                            voxels[x, y, z] = tmpVox;
+                        }
+                        else
+                        {
+                            tmpVox.x = chunkX + x * world.voxelScale;
+                            tmpVox.y = chunkY + y * world.voxelScale;
+                            tmpVox.z = chunkZ + z * world.voxelScale;
+                            tmpVox.type = VoxelTypeEnum.AIR;
+                            voxels[x, y, z] = tmpVox;
                         }
 
-                        if (Block(x, y - 1, z) == 0)
-                        {
-                            //Block below is air
-                            CubeBot(x, y, z, Block(x, y, z));
+                    }
+                    catch (System.Exception ex)
+                    {
 
-                        }
-
-                        if (Block(x + 1, y, z) == 0)
-                        {
-                            //Block east is air
-                            CubeEast(x, y, z, Block(x, y, z));
-
-                        }
-
-                        if (Block(x - 1, y, z) == 0)
-                        {
-                            //Block west is air
-                            CubeWest(x, y, z, Block(x, y, z));
-
-                        }
-
-                        if (Block(x, y, z + 1) == 0)
-                        {
-                            //Block north is air
-                            CubeNorth(x, y, z, Block(x, y, z));
-
-                        }
-
-                        if (Block(x, y, z - 1) == 0)
-                        {
-                            //Block south is air
-                            CubeSouth(x, y, z, Block(x, y, z));
-
-                        }
-
+                        throw;
                     }
 
                 }
             }
+        }
+
+        GenerateMesh();
+    }
+
+    public void GenerateMesh()
+    {
+        try
+        {
+            for (int x = 0; x < chunkSize / world.voxelScale; x++)
+            {
+                for (int y = 0; y < chunkSize / world.voxelScale; y++)
+                {
+                    for (int z = 0; z < chunkSize / world.voxelScale; z++)
+                    {
+                        Voxel currentVoxel = Block(x, y, z);
+                        //This code will run for every block in the chunk
+                        if (Block(x, y, z).type != 0)
+                        {
+                            //If the block is solid
+                            try
+                            {
+                                if (Block(x, y + 1, z).type == 0)
+                                {
+                                    //Block above is air
+                                    CubeTop(currentVoxel.x, currentVoxel.y, currentVoxel.z, currentVoxel.type);
+                                }
+
+                            }
+                            catch (Exception ex)
+                            {
+
+                                throw;
+                            }
+
+                            if (Block(x, y - 1, z).type == 0)
+                            {
+                                //Block below is air
+                                CubeBot(currentVoxel.x, currentVoxel.y, currentVoxel.z, currentVoxel.type);
+
+                            }
+
+                            if (Block(x + 1, y, z).type == 0)
+                            {
+                                //Block east is air
+                                CubeEast(currentVoxel.x, currentVoxel.y, currentVoxel.z, currentVoxel.type);
+
+                            }
+
+                            if (Block(x - 1, y, z).type == 0)
+                            {
+                                //Block west is air
+                                CubeWest(currentVoxel.x, currentVoxel.y, currentVoxel.z, currentVoxel.type);
+
+                            }
+
+                            if (Block(x, y, z + 1).type == 0)
+                            {
+                                //Block north is air
+                                CubeNorth(currentVoxel.x, currentVoxel.y, currentVoxel.z, currentVoxel.type);
+
+                            }
+
+                            if (Block(x, y, z - 1).type == 0)
+                            {
+                                //Block south is air
+                                CubeSouth(currentVoxel.x, currentVoxel.y, currentVoxel.z, currentVoxel.type);
+
+                            }
+
+                        }
+
+                    }
+                }
+            }
+
+        }
+        catch (System.Exception ex)
+        {
+
+            throw;
         }
 
         UpdateMesh();
@@ -154,20 +264,20 @@ public class Chunk : MonoBehaviour
         faceCount++; // Add this line
     }
 
-    void CubeTop(int x, int y, int z, byte block)
+    void CubeTop(float x, float y, float z, VoxelTypeEnum block)
     {
-        newVertices.Add(new Vector3(x, y, z + 1));
-        newVertices.Add(new Vector3(x + 1, y, z + 1));
-        newVertices.Add(new Vector3(x + 1, y, z));
+        newVertices.Add(new Vector3(x, y, z + voxelScale));
+        newVertices.Add(new Vector3(x + voxelScale, y, z + voxelScale));
+        newVertices.Add(new Vector3(x + voxelScale, y, z));
         newVertices.Add(new Vector3(x, y, z));
 
         Vector2 texturePos = new Vector2(0, 0);
 
-        if (Block(x, y, z) == 1)
+        if (block == VoxelTypeEnum.STONE)
         {
             texturePos = tStone;
         }
-        else if (Block(x, y, z) == 2)
+        else if (block == VoxelTypeEnum.GRASS)
         {
             texturePos = tGrassTop;
         }
@@ -175,20 +285,20 @@ public class Chunk : MonoBehaviour
         Cube(texturePos);
     }
 
-    void CubeNorth(int x, int y, int z, byte block)
+    void CubeNorth(float x, float y, float z, VoxelTypeEnum block)
     {
-        newVertices.Add(new Vector3(x + 1, y - 1, z + 1));
-        newVertices.Add(new Vector3(x + 1, y, z + 1));
-        newVertices.Add(new Vector3(x, y, z + 1));
-        newVertices.Add(new Vector3(x, y - 1, z + 1));
+        newVertices.Add(new Vector3(x + voxelScale, y - voxelScale, z + voxelScale));
+        newVertices.Add(new Vector3(x + voxelScale, y, z + voxelScale));
+        newVertices.Add(new Vector3(x, y, z + voxelScale));
+        newVertices.Add(new Vector3(x, y - voxelScale, z + voxelScale));
 
         Vector2 texturePos = new Vector2(0, 0);
 
-        if (Block(x, y, z) == 1)
+        if (block == VoxelTypeEnum.STONE)
         {
             texturePos = tStone;
         }
-        else if (Block(x, y, z) == 2)
+        else if (block == VoxelTypeEnum.GRASS)
         {
             texturePos = tGrassTop;
         }
@@ -196,20 +306,20 @@ public class Chunk : MonoBehaviour
         Cube(texturePos);
     }
 
-    void CubeEast(int x, int y, int z, byte block)
+    void CubeEast(float x, float y, float z, VoxelTypeEnum block)
     {
-        newVertices.Add(new Vector3(x + 1, y - 1, z));
-        newVertices.Add(new Vector3(x + 1, y, z));
-        newVertices.Add(new Vector3(x + 1, y, z + 1));
-        newVertices.Add(new Vector3(x + 1, y - 1, z + 1));
+        newVertices.Add(new Vector3(x + voxelScale, y - voxelScale, z));
+        newVertices.Add(new Vector3(x + voxelScale, y, z));
+        newVertices.Add(new Vector3(x + voxelScale, y, z + voxelScale));
+        newVertices.Add(new Vector3(x + voxelScale, y - voxelScale, z + voxelScale));
 
         Vector2 texturePos = new Vector2(0, 0);
 
-        if (Block(x, y, z) == 1)
+        if (block == VoxelTypeEnum.STONE)
         {
             texturePos = tStone;
         }
-        else if (Block(x, y, z) == 2)
+        else if (block == VoxelTypeEnum.GRASS)
         {
             texturePos = tGrassTop;
         }
@@ -217,20 +327,20 @@ public class Chunk : MonoBehaviour
         Cube(texturePos);
     }
 
-    void CubeSouth(int x, int y, int z, byte block)
+    void CubeSouth(float x, float y, float z, VoxelTypeEnum block)
     {
-        newVertices.Add(new Vector3(x, y - 1, z));
+        newVertices.Add(new Vector3(x, y - voxelScale, z));
         newVertices.Add(new Vector3(x, y, z));
-        newVertices.Add(new Vector3(x + 1, y, z));
-        newVertices.Add(new Vector3(x + 1, y - 1, z));
+        newVertices.Add(new Vector3(x + voxelScale, y, z));
+        newVertices.Add(new Vector3(x + voxelScale, y - voxelScale, z));
 
         Vector2 texturePos = new Vector2(0, 0);
 
-        if (Block(x, y, z) == 1)
+        if (block == VoxelTypeEnum.STONE)
         {
             texturePos = tStone;
         }
-        else if (Block(x, y, z) == 2)
+        else if (block == VoxelTypeEnum.GRASS)
         {
             texturePos = tGrassTop;
         }
@@ -238,20 +348,20 @@ public class Chunk : MonoBehaviour
         Cube(texturePos);
     }
 
-    void CubeWest(int x, int y, int z, byte block)
+    void CubeWest(float x, float y, float z, VoxelTypeEnum block)
     {
-        newVertices.Add(new Vector3(x, y - 1, z + 1));
-        newVertices.Add(new Vector3(x, y, z + 1));
+        newVertices.Add(new Vector3(x, y - voxelScale, z + voxelScale));
+        newVertices.Add(new Vector3(x, y, z + voxelScale));
         newVertices.Add(new Vector3(x, y, z));
-        newVertices.Add(new Vector3(x, y - 1, z));
+        newVertices.Add(new Vector3(x, y - voxelScale, z));
 
         Vector2 texturePos = new Vector2(0, 0);
 
-        if (Block(x, y, z) == 1)
+        if (block == VoxelTypeEnum.STONE)
         {
             texturePos = tStone;
         }
-        else if (Block(x, y, z) == 2)
+        else if (block == VoxelTypeEnum.GRASS)
         {
             texturePos = tGrassTop;
         }
@@ -259,12 +369,12 @@ public class Chunk : MonoBehaviour
         Cube(texturePos);
     }
 
-    void CubeBot(int x, int y, int z, byte block)
+    void CubeBot(float x, float y, float z, VoxelTypeEnum block)
     {
-        newVertices.Add(new Vector3(x, y - 1, z));
-        newVertices.Add(new Vector3(x + 1, y - 1, z));
-        newVertices.Add(new Vector3(x + 1, y - 1, z + 1));
-        newVertices.Add(new Vector3(x, y - 1, z + 1));
+        newVertices.Add(new Vector3(x, y - voxelScale, z));
+        newVertices.Add(new Vector3(x + voxelScale, y - voxelScale, z));
+        newVertices.Add(new Vector3(x + voxelScale, y - voxelScale, z + voxelScale));
+        newVertices.Add(new Vector3(x, y - voxelScale, z + voxelScale));
 
         Vector2 texturePos;
 
