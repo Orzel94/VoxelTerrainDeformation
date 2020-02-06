@@ -56,17 +56,17 @@ Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
                 {
 
                     //Create a temporary Gameobject for the new chunk instead of using chunks[x,y,z]
-                    GameObject newChunk = Instantiate(chunk, new Vector3(x * chunkSize - 0.5f,
-                     y * chunkSize + 0.5f, z * chunkSize - 0.5f), new Quaternion(0, 0, 0, 0)) as GameObject;
+                    GameObject newChunk = Instantiate(chunk, new Vector3(x * chunkSize/2 - 0.5f,
+                     y * chunkSize + 0.5f, z * chunkSize/2 - 0.5f), new Quaternion(0, 0, 0, 0)) as GameObject;
 
                     //Now instead of using a temporary variable for the script assign it
                     //to chunks[x,y,z] and use it instead of the old \"newChunkScript\" 
                     chunks[x, y, z] = newChunk.GetComponent("Chunk") as Chunk;
                     chunks[x, y, z].worldGO = gameObject;
                     chunks[x, y, z].chunkSize = chunkSize;
-                    chunks[x, y, z].chunkX = x * chunkSize;
+                    chunks[x, y, z].chunkX = x * chunkSize/2;
                     chunks[x, y, z].chunkY = y * chunkSize;
-                    chunks[x, y, z].chunkZ = z * chunkSize;
+                    chunks[x, y, z].chunkZ = z * chunkSize/2;
                     chunks[x, y, z].voxelScale = voxelScale;
                     //chunks[x, y, z].GenerateTerrain();
 
@@ -82,7 +82,7 @@ Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
 
     }
 
-    public int PerlinNoise(int x, int y, int z, float scale, float height, float power)
+    public int PerlinNoise(float x, float y, float z, float scale, float height, float power)
     {
         float rValue;
 
