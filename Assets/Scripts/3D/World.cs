@@ -19,7 +19,7 @@ public class World : MonoBehaviour
     public RidgeNoise Noise;
     //public BillowNoise Noise;
     public Bias BiasObj;
-    public Gain GainObj;
+    public static Gain GainObj;
 
     public float exp;
     public float gain;
@@ -82,7 +82,7 @@ Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
 
     }
 
-    public int PerlinNoise(float x, float y, float z, float scale, float height, float power)
+    public static int PerlinNoise(float x, float y, float z, float scale, float height, float power)
     {
         float rValue;
 

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Threading.Tasks;
 
 public class Voxel
 {
@@ -49,21 +50,33 @@ public class Chunk : MonoBehaviour
 
     private Voxel[,,] voxels;
     public float voxelScale;
+    private bool terrainGenerationEnded;
+    private bool meshUpdateNeeded;
 
     // Start is called before the first frame update
     void Start()
     {
+        terrainGenerationEnded = false;
+        meshUpdateNeeded = true;
         mesh = GetComponent<MeshFilter>().mesh;
         col = GetComponent<MeshCollider>();
         world = worldGO.GetComponent("World") as World;
-
-        GenerateTerrain();
+        Task.Factory.StartNew(() =>
+        {
+            GenerateTerrain();
+            terrainGenerationEnded = true;
+        });
+        //Task.WhenAll()
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        if (meshUpdateNeeded && terrainGenerationEnded)
+        {
+            UpdateMesh();
+            meshUpdateNeeded = false;
+        }
     }
 
     void UpdateMesh()
@@ -113,9 +126,9 @@ public class Chunk : MonoBehaviour
         {
             for (int z = 0; z < (int)(chunkSize / world.voxelScale); z++)
             {
-                int stone = world.PerlinNoise(2*chunkX+ x* world.voxelScale, 0,2*chunkZ+ z * world.voxelScale, 200, (int)(world.worldY / world.voxelScale) /** world.worldYMultiplier*/, 4.2f);// + (int)(world.worldY / world.voxelScale);
+                int stone = World.PerlinNoise(2 * chunkX + x * world.voxelScale, 0, 2 * chunkZ + z * world.voxelScale, 200, (int)(world.worldY / world.voxelScale) /** world.worldYMultiplier*/, 4.2f);// + (int)(world.worldY / world.voxelScale);
                 //stone += PerlinNoise(x, 300, z, 20, 4, 1.5f) + 10;
-                int dirt = world.PerlinNoise(2*chunkX + x * world.voxelScale, 100, 2*chunkZ + z * world.voxelScale, 200, world.worldY, 0) + 1;// + (int)(world.worldY / world.voxelScale); //Added +1 to make sure minimum grass height is 1
+                int dirt = World.PerlinNoise(2 * chunkX + x * world.voxelScale, 100, 2 * chunkZ + z * world.voxelScale, 200, world.worldY, 0) + 1;// + (int)(world.worldY / world.voxelScale); //Added +1 to make sure minimum grass height is 1
                 //Debug.Log($"stone: {stone} , x: {x}, z: {z}");
                 //for (int y = (int)(worldY / voxelScale); y < (int)(worldY / voxelScale) * worldYMultiplier; y++)
                 for (int y = 0; y < (int)(world.worldY / world.voxelScale); y++)
@@ -186,11 +199,11 @@ public class Chunk : MonoBehaviour
                         {
                             //If the block is solid
 
-                                if (Block(x, y + 1, z).type == 0)
-                                {
-                                    //Block above is air
-                                    CubeTop(currentVoxel.x, currentVoxel.y, currentVoxel.z, currentVoxel.type);
-                                }
+                            if (Block(x, y + 1, z).type == 0)
+                            {
+                                //Block above is air
+                                CubeTop(currentVoxel.x, currentVoxel.y, currentVoxel.z, currentVoxel.type);
+                            }
 
                             if (Block(x, y - 1, z).type == 0)
                             {
@@ -240,7 +253,7 @@ public class Chunk : MonoBehaviour
             throw;
         }
 
-        UpdateMesh();
+        //UpdateMesh();
     }
 
     void Cube(Vector2 texturePos)
