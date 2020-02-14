@@ -16,14 +16,11 @@ public class World : MonoBehaviour
     public int worldZ;
     public int worldYMultiplier = 2;
 
-    public RidgeNoise Noise;
-    //public BillowNoise Noise;
-    public Bias BiasObj;
-    public static Gain GainObj;
+
 
     public float exp;
     public float gain;
-    public float offset;
+    public float offset; 
 
     public GameObject chunk;
     public Chunk[,,] chunks;  //Changed from public GameObject[,,] chunks;
@@ -35,14 +32,7 @@ public class World : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Noise = new RidgeNoise(1);
-        Noise.Exponent = exp;// 1.0f;
-        Noise.Gain = gain;// 1.2f;
-        Noise.Offset = offset;// 0.7f;
-        //Noise = new BillowNoise(4);
 
-        BiasObj = new Bias(Noise, -0.2f);
-        GainObj = new Gain(BiasObj, -0.2f);
 
 
         chunks = new Chunk[Mathf.FloorToInt(worldX / chunkSize),
@@ -80,35 +70,6 @@ Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
     void Update()
     {
 
-    }
-
-    public static int PerlinNoise(float x, float y, float z, float scale, float height, float power)
-    {
-        float rValue;
-
-        //rValue = Noise.GetValue(((float)x) / scale, ((float)y) / scale, ((float)z) / scale);
-        //rValue = Noise.GetValue(((float)x), ((float)y), ((float)z));
-        //rValue = BiasObj.GetValue(((float)x), ((float)y), ((float)z));
-        try
-        {
-            rValue = GainObj.GetValue(((float)x / scale), ((float)y / 50), ((float)z / scale));
-            if (rValue < 0)
-            {
-                rValue = -rValue;
-            }
-            rValue *= height;
-
-            if (power != 0)
-            {
-                //rValue = Mathf.Pow(rValue, power);
-            }
-        }
-        catch (System.Exception ex)
-        {
-
-            throw;
-        }
-        return (int)rValue;
     }
 
     //public byte Block(int x, int y, int z)

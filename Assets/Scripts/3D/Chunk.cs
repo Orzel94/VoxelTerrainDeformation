@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
+using CoherentNoise.Generation.Fractal;
+using CoherentNoise.Generation.Modification;
 
 public class Voxel
 {
@@ -53,14 +55,33 @@ public class Chunk : MonoBehaviour
     private bool terrainGenerationEnded;
     private bool meshUpdateNeeded;
 
+    public RidgeNoise Noise;
+    //public BillowNoise Noise;
+    public Bias BiasObj;
+    public Gain GainObj;
+
+    public float exp;
+    public float gain;
+    public float offset;
+
     // Start is called before the first frame update
     void Start()
     {
+
+        Noise = new RidgeNoise(1);
+
+        //Noise = new BillowNoise(4);
+
+        BiasObj = new Bias(Noise, -0.2f);
+        GainObj = new Gain(BiasObj, -0.2f);
         terrainGenerationEnded = false;
         meshUpdateNeeded = true;
         mesh = GetComponent<MeshFilter>().mesh;
         col = GetComponent<MeshCollider>();
         world = worldGO.GetComponent("World") as World;
+        Noise.Exponent = world.exp;// 1.0f;
+        Noise.Gain = world.gain;// 1.2f;
+        Noise.Offset = world.offset;// 0.7f;
         Task.Factory.StartNew(() =>
         {
             GenerateTerrain();
@@ -126,9 +147,9 @@ public class Chunk : MonoBehaviour
         {
             for (int z = 0; z < (int)(chunkSize / world.voxelScale); z++)
             {
-                int stone = World.PerlinNoise(2 * chunkX + x * world.voxelScale, 0, 2 * chunkZ + z * world.voxelScale, 200, (int)(world.worldY / world.voxelScale) /** world.worldYMultiplier*/, 4.2f);// + (int)(world.worldY / world.voxelScale);
+                int stone = PerlinNoise(2 * chunkX + x * world.voxelScale, 0, 2 * chunkZ + z * world.voxelScale, 200, (int)(world.worldY / world.voxelScale) /** world.worldYMultiplier*/, 4.2f);// + (int)(world.worldY / world.voxelScale);
                 //stone += PerlinNoise(x, 300, z, 20, 4, 1.5f) + 10;
-                int dirt = World.PerlinNoise(2 * chunkX + x * world.voxelScale, 100, 2 * chunkZ + z * world.voxelScale, 200, world.worldY, 0) + 1;// + (int)(world.worldY / world.voxelScale); //Added +1 to make sure minimum grass height is 1
+                int dirt = PerlinNoise(2 * chunkX + x * world.voxelScale, 100, 2 * chunkZ + z * world.voxelScale, 200, world.worldY, 0) + 1;// + (int)(world.worldY / world.voxelScale); //Added +1 to make sure minimum grass height is 1
                 //Debug.Log($"stone: {stone} , x: {x}, z: {z}");
                 //for (int y = (int)(worldY / voxelScale); y < (int)(worldY / voxelScale) * worldYMultiplier; y++)
                 for (int y = 0; y < (int)(world.worldY / world.voxelScale); y++)
@@ -179,8 +200,12 @@ public class Chunk : MonoBehaviour
                 }
             }
         }
-
-        GenerateMesh();
+        //Task.Factory.StartNew(() =>
+        //{
+            GenerateMesh();
+        //    terrainGenerationEnded = true;
+        //});
+        
     }
 
     public void GenerateMesh()
@@ -394,5 +419,33 @@ public class Chunk : MonoBehaviour
     }
 
 
+    public int PerlinNoise(float x, float y, float z, float scale, float height, float power)
+    {
+        float rValue;
+
+        //rValue = Noise.GetValue(((float)x) / scale, ((float)y) / scale, ((float)z) / scale);
+        //rValue = Noise.GetValue(((float)x), ((float)y), ((float)z));
+        //rValue = BiasObj.GetValue(((float)x), ((float)y), ((float)z));
+        try
+        {
+            rValue = GainObj.GetValue(((float)x / scale), ((float)y / 50), ((float)z / scale));
+            if (rValue < 0)
+            {
+                rValue = -rValue;
+            }
+            rValue *= height;
+
+            if (power != 0)
+            {
+                //rValue = Mathf.Pow(rValue, power);
+            }
+        }
+        catch (System.Exception ex)
+        {
+
+            throw;
+        }
+        return (int)rValue;
+    }
 
 }
