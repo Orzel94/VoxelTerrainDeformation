@@ -46,8 +46,8 @@ Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
                 {
 
                     //Create a temporary Gameobject for the new chunk instead of using chunks[x,y,z]
-                    GameObject newChunk = Instantiate(chunk, new Vector3(x * chunkSize/2 - 0.5f,
-                     y * chunkSize + 0.5f, z * chunkSize/2 - 0.5f), new Quaternion(0, 0, 0, 0)) as GameObject;
+                    GameObject newChunk = Instantiate(chunk, new Vector3(x * chunkSize/2,
+                     y * chunkSize, z * chunkSize/2), new Quaternion(0, 0, 0, 0)) as GameObject;
 
                     //Now instead of using a temporary variable for the script assign it
                     //to chunks[x,y,z] and use it instead of the old \"newChunkScript\" 
@@ -72,23 +72,4 @@ Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
 
     }
 
-    //public byte Block(int x, int y, int z)
-    //{
-
-    //    if (x/ voxelScale >= worldX || x/ voxelScale < 0 || y/ voxelScale >= worldY || y/ voxelScale < 0 || z/ voxelScale >= worldZ || z/ voxelScale < 0)
-    //    {
-    //        return (byte)1;
-    //    }
-
-    //    try
-    //    {
-    //        return data[x, y, z];
-    //    }
-    //    catch (System.Exception ex)
-    //    {
-
-    //        return 0;
-    //    }
-
-    //}
 }

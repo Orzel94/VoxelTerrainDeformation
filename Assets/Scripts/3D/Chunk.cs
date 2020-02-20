@@ -50,10 +50,10 @@ public class Chunk : MonoBehaviour
 
     public bool update;
 
-    private Voxel[,,] voxels;
+    public Voxel[,,] voxels;
     public float voxelScale;
     private bool terrainGenerationEnded;
-    private bool meshUpdateNeeded;
+    public bool meshUpdateNeeded;
 
     public RidgeNoise Noise;
     //public BillowNoise Noise;
