@@ -8,9 +8,6 @@ using CoherentNoise.Generation.Modification;
 
 public class Voxel
 {
-    public float x { get; set; }
-    public float y { get; set; }
-    public float z { get; set; }
     public VoxelTypeEnum type { get; set; }
 }
 
@@ -159,33 +156,21 @@ public class Chunk : MonoBehaviour
                         Voxel tmpVox = new Voxel();
                         if (y <= stone)
                         {
-                            tmpVox.x = chunkX + x * world.voxelScale;
-                            tmpVox.y = chunkY + y * world.voxelScale;
-                            tmpVox.z = chunkZ + z * world.voxelScale;
                             tmpVox.type = VoxelTypeEnum.STONE;
                             voxels[x, y, z] = tmpVox;
                         }
                         else if (y <= dirt + stone)
                         {
-                            tmpVox.x = chunkX + x * world.voxelScale;
-                            tmpVox.y = chunkY + y * world.voxelScale;
-                            tmpVox.z = chunkZ + z * world.voxelScale;
                             tmpVox.type = VoxelTypeEnum.GRASS;
                             voxels[x, y, z] = tmpVox;
                         }
                         else if (y == 0)
                         {
-                            tmpVox.x = chunkX + x * world.voxelScale;
-                            tmpVox.y = chunkY + y * world.voxelScale;
-                            tmpVox.z = chunkZ + z * world.voxelScale;
                             tmpVox.type = VoxelTypeEnum.STONE;
                             voxels[x, y, z] = tmpVox;
                         }
                         else
                         {
-                            tmpVox.x = chunkX + x * world.voxelScale;
-                            tmpVox.y = chunkY + y * world.voxelScale;
-                            tmpVox.z = chunkZ + z * world.voxelScale;
                             tmpVox.type = VoxelTypeEnum.AIR;
                             voxels[x, y, z] = tmpVox;
                         }
@@ -227,41 +212,41 @@ public class Chunk : MonoBehaviour
                             if (Block(x, y + 1, z).type == 0)
                             {
                                 //Block above is air
-                                CubeTop(currentVoxel.x, currentVoxel.y, currentVoxel.z, currentVoxel.type);
+                                CubeTop(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel.type);
                             }
 
                             if (Block(x, y - 1, z).type == 0)
                             {
                                 //Block below is air
-                                CubeBot(currentVoxel.x, currentVoxel.y, currentVoxel.z, currentVoxel.type);
+                                CubeBot(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel.type);
 
                             }
 
                             if (Block(x + 1, y, z).type == 0)
                             {
                                 //Block east is air
-                                CubeEast(currentVoxel.x, currentVoxel.y, currentVoxel.z, currentVoxel.type);
+                                CubeEast(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel.type);
 
                             }
 
                             if (Block(x - 1, y, z).type == 0)
                             {
                                 //Block west is air
-                                CubeWest(currentVoxel.x, currentVoxel.y, currentVoxel.z, currentVoxel.type);
+                                CubeWest(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel.type);
 
                             }
 
                             if (Block(x, y, z + 1).type == 0)
                             {
                                 //Block north is air
-                                CubeNorth(currentVoxel.x, currentVoxel.y, currentVoxel.z, currentVoxel.type);
+                                CubeNorth(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel.type);
 
                             }
 
                             if (Block(x, y, z - 1).type == 0)
                             {
                                 //Block south is air
-                                CubeSouth(currentVoxel.x, currentVoxel.y, currentVoxel.z, currentVoxel.type);
+                                CubeSouth(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel.type);
 
                             }
 
