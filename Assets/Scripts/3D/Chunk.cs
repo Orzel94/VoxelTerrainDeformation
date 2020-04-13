@@ -7,6 +7,7 @@ using CoherentNoise.Generation.Fractal;
 using CoherentNoise.Generation.Modification;
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
+using Unity.IL2CPP.CompilerServices;
 
 public enum VoxelTypeEnum
 {
@@ -14,7 +15,7 @@ public enum VoxelTypeEnum
     STONE = 1,
     GRASS = 2
 }
-
+[Il2CppSetOption(Option.ArrayBoundsChecks, false)]
 public class Chunk : MonoBehaviour
 {
 
