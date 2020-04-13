@@ -148,7 +148,7 @@ public class ModifyTerrain : MonoBehaviour
         int voxY = Mathf.FloorToInt(y / world.voxelScale);
         int voxZ = Mathf.FloorToInt((z - (updateZ * world.chunkSize)) / world.voxelScale);
 
-        world.chunks[updateX, 0, updateZ].voxels[voxX, voxY + 1, voxZ].type = (VoxelTypeEnum)block;
+        world.chunks[updateX, 0, updateZ].voxels[voxX, voxY + 1, voxZ] = (VoxelTypeEnum)block;
         world.chunks[updateX, 0, updateZ].GenerateMesh();
         world.chunks[updateX, 0, updateZ].meshUpdateNeeded = true;
     }

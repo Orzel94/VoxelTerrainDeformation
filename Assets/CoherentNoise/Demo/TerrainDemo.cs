@@ -73,8 +73,8 @@ public class TerrainDemo : MonoBehaviour
             Vector3 nextPoint = Camera.main.transform.position + new Vector3(0, 0, Speed * Time.deltaTime);
             // let's fond out terrain height there
             Vector3 coord = nextPoint - t.transform.position;
-            var x = coord.z / (t.terrainData.heightmapWidth * t.terrainData.heightmapScale.x);
-            var y = coord.x / (t.terrainData.heightmapHeight * t.terrainData.heightmapScale.z);
+            var x = coord.z / (t.terrainData.heightmapResolution * t.terrainData.heightmapScale.x);
+            var y = coord.x / (t.terrainData.heightmapResolution * t.terrainData.heightmapScale.z);
             // this is the desired camera height
             var targetheight = t.terrainData.GetInterpolatedHeight(y, x) + 25;
 
@@ -131,16 +131,16 @@ public class TerrainDemo : MonoBehaviour
         var td = t.terrainData;
         // fixing resultions in code, as there's no place in editor to do that
         td.alphamapResolution = td.heightmapResolution;
-        td.SetDetailResolution(td.heightmapWidth, 16);
+        td.SetDetailResolution(td.heightmapResolution, 16);
         
         // arrays for various maps used in terrain
-        var hm = new float[td.heightmapWidth, td.heightmapHeight]; // height
-        var am = new float[td.heightmapWidth, td.heightmapHeight, 2]; // alpha (textures)
+        var hm = new float[td.heightmapResolution, td.heightmapResolution]; // height
+        var am = new float[td.heightmapResolution, td.heightmapResolution, 2]; // alpha (textures)
         var dm = new int[td.detailResolution, td.detailResolution]; // detail (grass)
 
         // create heightmap data
-        for (int ii = 0; ii < td.heightmapWidth; ++ii)
-            for (int jj = 0; jj < td.heightmapHeight; ++jj)
+        for (int ii = 0; ii < td.heightmapResolution; ++ii)
+            for (int jj = 0; jj < td.heightmapResolution; ++jj)
             {
                 // check our running time. We want to yield every now and then, so that FPS don't stall
                 var timeInMs = (float)(DateTime.UtcNow.Ticks - start) / TimeSpan.TicksPerMillisecond;
@@ -151,8 +151,8 @@ public class TerrainDemo : MonoBehaviour
                 }
 
                 // Domain coordinates. Each terrain is 1x1 in domain space
-                float x = (float)ii / (td.heightmapWidth - 1) + m_NoiseCoord;
-                float y = (float)jj / (td.heightmapHeight - 1);
+                float x = (float)ii / (td.heightmapResolution - 1) + m_NoiseCoord;
+                float y = (float)jj / (td.heightmapResolution - 1);
 
                 // calculate height. This is where the performance hit is; everything else is peanuts compared to evaluating
                 // a complex noise function
@@ -168,8 +168,8 @@ public class TerrainDemo : MonoBehaviour
                 var details = w > 0.5f ? (w - 0.5) * 40 : 0; // w<0.5 means desert, so no grass there. 
                 // Unity does not allow to set detail map resultion at will, so we have to map heightmap coords to detailmap
                 // (although in this case terrains are square, and resolutions match exactly)
-                int dx = ii * td.detailResolution / td.heightmapWidth;
-                int dy = jj * td.detailResolution / td.heightmapHeight;
+                int dx = ii * td.detailResolution / td.heightmapResolution;
+                int dy = jj * td.detailResolution / td.heightmapResolution;
 
                 // when we have less than 1 blade of grass, add one randomly. This makes grass to no-grass transition smoother
                 dm[dx, dy] = details > 1 ? (int)details : Random.value < details ? 1 : 0;

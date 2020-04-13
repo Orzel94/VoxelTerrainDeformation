@@ -5,11 +5,8 @@ using System;
 using System.Threading.Tasks;
 using CoherentNoise.Generation.Fractal;
 using CoherentNoise.Generation.Modification;
-
-public class Voxel
-{
-    public VoxelTypeEnum type { get; set; }
-}
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 public enum VoxelTypeEnum
 {
@@ -47,7 +44,7 @@ public class Chunk : MonoBehaviour
 
     public bool update;
 
-    public Voxel[,,] voxels;
+    public VoxelTypeEnum[,,] voxels;
     public float voxelScale;
     private bool terrainGenerationEnded;
     public bool meshUpdateNeeded;
@@ -81,8 +78,15 @@ public class Chunk : MonoBehaviour
         Noise.Offset = world.offset;// 0.7f;
         Task.Factory.StartNew(() =>
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             GenerateTerrain();
             terrainGenerationEnded = true;
+
+            stopwatch.Stop();
+            UnityEngine.Debug.Log($"ElapsedMilliseconds: {stopwatch.ElapsedMilliseconds}");
+            
         });
         //Task.WhenAll()
     }
@@ -102,13 +106,13 @@ public class Chunk : MonoBehaviour
         mesh.Clear();
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         mesh.vertices = newVertices.ToArray();
-        Debug.Log($"vertices count {newVertices.Count}; list max size {newVertices.Capacity}; chunkX: {chunkX}  ChunkZ: {chunkZ}");
-        Debug.Log($"vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        //Debug.Log($"vertices count {newVertices.Count}; list max size {newVertices.Capacity}; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        //Debug.Log($"vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         mesh.uv = newUV.ToArray();
         mesh.triangles = newTriangles.ToArray();
-        Debug.Log($"111vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        //Debug.Log($"111vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         mesh.Optimize();
-        Debug.Log($"222vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        //Debug.Log($"222vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         mesh.RecalculateNormals();
 
         col.sharedMesh = null;
@@ -117,11 +121,11 @@ public class Chunk : MonoBehaviour
         newVertices.Clear();
         newUV.Clear();
         newTriangles.Clear();
-        Debug.Log($"333vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        //Debug.Log($"333vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         faceCount = 0;
     }
 
-    Voxel Block(int x, int y, int z)
+    VoxelTypeEnum Block(int x, int y, int z)
     {
         try
         {
@@ -129,9 +133,7 @@ public class Chunk : MonoBehaviour
         }
         catch (Exception ex)
         {
-            var vo = new Voxel();
-            vo.type = VoxelTypeEnum.AIR;
-            return vo;
+            return VoxelTypeEnum.AIR;
         }
 
         //return world.Block(x + chunkX, y + chunkY, z + chunkZ); // Don't replace the world.Block in this line!
@@ -139,7 +141,7 @@ public class Chunk : MonoBehaviour
 
     public void GenerateTerrain()
     {
-        voxels = new Voxel[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), /** worldYMultiplier,*/ (int)(chunkSize / world.voxelScale)];
+        voxels = new VoxelTypeEnum[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), /** worldYMultiplier,*/ (int)(chunkSize / world.voxelScale)];
         for (int x = 0; x < (int)(chunkSize / world.voxelScale); x++)
         {
             for (int z = 0; z < (int)(chunkSize / world.voxelScale); z++)
@@ -153,26 +155,21 @@ public class Chunk : MonoBehaviour
                 {
                     try
                     {
-                        Voxel tmpVox = new Voxel();
                         if (y <= stone)
                         {
-                            tmpVox.type = VoxelTypeEnum.STONE;
-                            voxels[x, y, z] = tmpVox;
+                            voxels[x, y, z] = VoxelTypeEnum.STONE;
                         }
                         else if (y <= dirt + stone)
                         {
-                            tmpVox.type = VoxelTypeEnum.GRASS;
-                            voxels[x, y, z] = tmpVox;
+                            voxels[x, y, z] = VoxelTypeEnum.GRASS;
                         }
                         else if (y == 0)
                         {
-                            tmpVox.type = VoxelTypeEnum.STONE;
-                            voxels[x, y, z] = tmpVox;
+                            voxels[x, y, z] = VoxelTypeEnum.STONE;
                         }
                         else
                         {
-                            tmpVox.type = VoxelTypeEnum.AIR;
-                            voxels[x, y, z] = tmpVox;
+                            voxels[x, y, z] = VoxelTypeEnum.AIR;
                         }
 
                     }
@@ -203,50 +200,50 @@ public class Chunk : MonoBehaviour
                 {
                     for (int z = 0; z < chunkSize / world.voxelScale; z++)
                     {
-                        Voxel currentVoxel = Block(x, y, z);
+                        VoxelTypeEnum currentVoxel = Block(x, y, z);
                         //This code will run for every block in the chunk
-                        if (Block(x, y, z).type != 0)
+                        if (Block(x, y, z) != VoxelTypeEnum.AIR)
                         {
                             //If the block is solid
 
-                            if (Block(x, y + 1, z).type == 0)
+                            if (Block(x, y + 1, z) == VoxelTypeEnum.AIR)
                             {
                                 //Block above is air
-                                CubeTop(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel.type);
+                                CubeTop(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel);
                             }
 
-                            if (Block(x, y - 1, z).type == 0)
+                            if (Block(x, y - 1, z) == VoxelTypeEnum.AIR)
                             {
                                 //Block below is air
-                                CubeBot(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel.type);
+                                CubeBot(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel);
 
                             }
 
-                            if (Block(x + 1, y, z).type == 0)
+                            if (Block(x + 1, y, z) == VoxelTypeEnum.AIR)
                             {
                                 //Block east is air
-                                CubeEast(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel.type);
+                                CubeEast(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel);
 
                             }
 
-                            if (Block(x - 1, y, z).type == 0)
+                            if (Block(x - 1, y, z) == VoxelTypeEnum.AIR)
                             {
                                 //Block west is air
-                                CubeWest(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel.type);
+                                CubeWest(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel);
 
                             }
 
-                            if (Block(x, y, z + 1).type == 0)
+                            if (Block(x, y, z + 1) == VoxelTypeEnum.AIR)
                             {
                                 //Block north is air
-                                CubeNorth(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel.type);
+                                CubeNorth(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel);
 
                             }
 
-                            if (Block(x, y, z - 1).type == 0)
+                            if (Block(x, y, z - 1) == VoxelTypeEnum.AIR)
                             {
                                 //Block south is air
-                                CubeSouth(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel.type);
+                                CubeSouth(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale, currentVoxel);
 
                             }
 
