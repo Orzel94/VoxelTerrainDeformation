@@ -60,8 +60,30 @@ public class Chunk : MonoBehaviour
     public float gain;
     public float offset;
 
-    // Start is called before the first frame update
-    void Start()
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Color(1, 1, 0, 0.75F);
+        for (int x = 0; x < (int)(chunkSize / world.voxelScale); x++)
+        {
+            for (int z = 0; z < (int)(chunkSize / world.voxelScale); z++)
+            {
+                for (int y = (int)((world.worldY / world.voxelScale)-1); y > 0; y--)
+                {
+
+                    if (Block(x, y, z) != VoxelTypeEnum.AIR && Block(x, y + 1, z) == VoxelTypeEnum.AIR)
+                    {
+                        //Block above is air
+                        Vector3 position = new Vector3(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale);
+                        Gizmos.DrawWireSphere(position, 0.1f);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+        // Start is called before the first frame update
+        void Start()
     {
 
         Noise = new RidgeNoise(1);
@@ -475,89 +497,91 @@ public class Chunk : MonoBehaviour
                         if ((lookup != 0) && (lookup != 255))
                         {
                             Vector3[] verts = new Vector3[12];
+                            Vector3 position = new Vector3(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale);
+                            
                             // 0 - 1
                             if ((edgeTable[lookup] & 1) != 0)
                                 // x + (y + 1)*this->size_y + (z + 1) * this->size_y * this->size_z
                                 // (x + 1) + (y + 1)*this->size_y + (z + 1) * this->size_y * this->size_z
-                                verts[0] = Interpolate(x, y + 1, z + 1,
-                                                    x + 1, y + 1, z + 1);
+                                verts[0] = Interpolate(position.x, position.y + voxelScale, position.z + voxelScale,
+                                                    position.x + voxelScale, position.y + voxelScale, position.z + voxelScale);
 
                             // 1 - 2
                             if ((edgeTable[lookup] & 2) != 0)
                                 // (x + 1) + (y + 1)*this->size_y + (z + 1) * this->size_y * this->size_z
                                 // (x + 1) + (y + 1)*this->size_y + z * this->size_y * this->size_z
-                                verts[1] = Interpolate(x + 1, y + 1, z + 1,
-                                                    x + 1, y + 1, z);
+                                verts[1] = Interpolate(position.x + voxelScale, position.y + voxelScale, position.z + voxelScale,
+                                                    position.x + voxelScale, position.y + voxelScale, position.z);
 
                             // 2 - 3
                             if ((edgeTable[lookup] & 4) != 0)
                                 // (x + 1) + (y + 1)*this->size_y + z * this->size_y * this->size_z
                                 // x + (y + 1)*this->size_y + z * this->size_y * this->size_z
-                                verts[2] = Interpolate(x + 1, y + 1, z,
-                                                    x, y + 1, z);
+                                verts[2] = Interpolate(position.x + voxelScale, position.y + voxelScale, position.z,
+                                                    position.x, position.y + voxelScale, position.z);
 
                             // 3 - 0
                             if ((edgeTable[lookup] & 8) != 0)
                                 // x + (y + 1)*this->size_y + z * this->size_y * this->size_z
                                 // x + (y + 1)*this->size_y + (z + 1) * this->size_y * this->size_z
-                                verts[3] = Interpolate(x, y + 1, z,
-                                                    x, y + 1, z + 1);
+                                verts[3] = Interpolate(position.x, position.y + voxelScale, position.z,
+                                                    position.x, position.y + voxelScale, position.z + voxelScale);
 
                             // 4 - 5
                             if ((edgeTable[lookup] & 16) != 0)
                                 // x + y*this->size_y + (z + 1) * this->size_y * this->size_z
                                 // (x + 1) + y*this->size_y + (z + 1) * this->size_y * this->size_z
-                                verts[4] = Interpolate(x, y, z + 1,
-                                                    x + 1, y, z + 1);
+                                verts[4] = Interpolate(position.x, position.y, position.z + voxelScale,
+                                                    position.x + voxelScale, position.y, position.z + voxelScale);
 
                             // 5 - 6
                             if ((edgeTable[lookup] & 32) != 0)
                                 // (x + 1) + y*this->size_y + (z + 1) * this->size_y * this->size_z
                                 // (x + 1) + y*this->size_y + z * this->size_y * this->size_z
-                                verts[5] = Interpolate(x + 1, y, z + 1,
-                                                    x + 1, y, z);
+                                verts[5] = Interpolate(position.x + voxelScale, position.y, position.z + voxelScale,
+                                                    position.x + voxelScale, position.y, position.z);
 
                             // 6 - 7
                             if ((edgeTable[lookup] & 64) != 0)
                                 // (x + 1) + y*this->size_y + z * this->size_y * this->size_z
                                 // x + y*this->size_y + z * this->size_y * this->size_z
-                                verts[6] = Interpolate(x + 1, y, z,
-                                                    x, y, z);
+                                verts[6] = Interpolate(position.x + voxelScale, position.y, position.z,
+                                                    position.x, position.y, position.z);
 
                             // 7 - 4
                             if ((edgeTable[lookup] & 128) != 0)
                                 // x + y*this->size_y + z * this->size_y * this->size_z
                                 // x + y*this->size_y + (z + 1) * this->size_y * this->size_z
-                                verts[7] = Interpolate(x, y, z,
-                                                    x, y, z + 1);
+                                verts[7] = Interpolate(position.x, position.y, position.z,
+                                                    position.x, position.y, position.z + voxelScale);
 
                             // 0 - 4
                             if ((edgeTable[lookup] & 256) != 0)
                                 // x + (y + 1)*this->size_y + (z + 1) * this->size_y * this->size_z
                                 // x + y*this->size_y + (z + 1) * this->size_y * this->size_z
-                                verts[8] = Interpolate(x, y + 1, z + 1,
-                                                    x, y, z + 1);
+                                verts[8] = Interpolate(position.x, position.y + voxelScale, position.z + voxelScale,
+                                                    position.x, position.y, position.z + voxelScale);
 
                             // 1 - 5
                             if ((edgeTable[lookup] & 512) != 0)
                                 // (x + 1) + (y + 1)*this->size_y + (z + 1) * this->size_y * this->size_z
                                 // (x + 1) + y*this->size_y + (z + 1) * this->size_y * this->size_z
-                                verts[9] = Interpolate(x + 1, y + 1, z + 1,
-                                                    x + 1, y, z + 1);
+                                verts[9] = Interpolate(position.x + voxelScale, position.y + voxelScale, position.z + voxelScale,
+                                                    position.x + voxelScale, position.y, position.z + voxelScale);
 
                             // 2 - 6
                             if ((edgeTable[lookup] & 1024) != 0)
                                 // (x + 1) + (y + 1)*this->size_y + z * this->size_y * this->size_z
                                 // (x + 1) + y*this->size_y + z * this->size_y * this->size_z
-                                verts[10] = Interpolate(x + 1, y + 1, z,
-                                                    x + 1, y, z);
+                                verts[10] = Interpolate(position.x + voxelScale, position.y + voxelScale, position.z,
+                                                    position.x + voxelScale, position.y, position.z);
 
                             // 3 - 7
                             if ((edgeTable[lookup] & 2048) != 0)
                                 // x + (y + 1)*this->size_y + z * this->size_y * this->size_z
                                 // x + y*this->size_y + z * this->size_y * this->size_z
-                                verts[11] = Interpolate(x, y + 1, z,
-                                                    x, y, z);
+                                verts[11] = Interpolate(position.x, position.y + voxelScale, position.z,
+                                                    position.x, position.y, position.z);
 
                             /* alle punktene vĺre skal ha full fargeverdi */
                             //glColor3f(1.0f, 1.0f, 1.0f);
@@ -626,7 +650,7 @@ public class Chunk : MonoBehaviour
         }
     }
 
-    public Vector3 Interpolate(int x, int y, int z, int x2, int y2, int z2)
+    public Vector3 Interpolate(float x, float y, float z, float x2, float y2, float z2)
     {
         Vector3 res = new Vector3();
         res.x = (x + x2) / 2;
