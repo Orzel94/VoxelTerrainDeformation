@@ -628,23 +628,28 @@ public class Chunk : MonoBehaviour
                                             bool exist = vertDic.TryGetValue(vertIndex, out jVal);
                                             if (exist)
                                             {
-                                                //voxel.triangles.Add(faceCount + jVal);
-                                                newTriangles.Add(faceCount + jVal);
+                                                ///////
+                                                voxel.triangles.Add(faceCount + jVal);
+                                                //////////
+                                                //newTriangles.Add(faceCount + jVal);
                                             }
                                             else
                                             {
                                                 Vector2 texturePos = tGrass;
-                                                //voxel.triangles.Add(faceCount + vertDic.Count);
-                                                //voxel.vertices.Add(verts[vertIndex]);
-                                                //voxel.uvs.Add(new Vector2(tUnit * texturePos.x + tUnit, tUnit * texturePos.y));
-                                                
+                                                ////////
+                                                voxel.triangles.Add(faceCount + vertDic.Count);
+                                                voxel.vertices.Add(verts[vertIndex]);
+                                                voxel.uvs.Add(new Vector2(tUnit * texturePos.x + tUnit, tUnit * texturePos.y));
+                                                ////////
+
+                                                //newTriangles.Add(faceCount + vertDic.Count);
                                                 vertDic.Add(vertIndex, vertDic.Count);
 
 
-                                                newTriangles.Add(faceCount + vertDic.Count);
-                                                newVertices.Add(verts[vertIndex]);
 
-                                                newUV.Add(new Vector2(tUnit * texturePos.x + tUnit, tUnit * texturePos.y));
+                                                //newVertices.Add(verts[vertIndex]);
+
+                                                //newUV.Add(new Vector2(tUnit * texturePos.x + tUnit, tUnit * texturePos.y));
                                             }
                                         }
                                         catch (System.Exception ex)
@@ -656,7 +661,7 @@ public class Chunk : MonoBehaviour
 
                                 }
                                 faceCount += vertDic.Count;
-                                //voxelMesh[x, y, z] = voxel;
+                                voxelMesh[x, y, z] = voxel;
                             }
                             catch (System.Exception ex)
                             {
@@ -669,17 +674,37 @@ public class Chunk : MonoBehaviour
                     }
                 }
             }
-            //SmoothDataSet(voxelMesh, /*this.brushRadius*/5, /*this.iterations*/2);
+            SmoothDataSet(voxelMesh, /*this.brushRadius*/5, /*this.iterations*/2);
             //foreach (var item in voxelMesh)
             //{
-            //    if (item!=null)
-            //    {
-            //        newTriangles.AddRange(item.triangles);
-            //        newVertices.AddRange(item.vertices);
-            //        newUV.AddRange(item.uvs);
-            //    }
-                
-            //}
+            for (int z = 0; z < chunkSize / world.voxelScale - 1; z++)
+            {
+                for (int x = 0; x < chunkSize / world.voxelScale - 1; x++)
+                {
+                    for (int y = 0; y < world.worldY / world.voxelScale - 1; y++)
+                    {
+                        if (voxelMesh[x, y, z] != null)
+                        {
+                            for (int i = 0; i < voxelMesh[x, y, z].triangles.Count; i++)
+                            {
+                                newTriangles.Add(voxelMesh[x, y, z].triangles[i]);
+                            }
+                            for (int i = 0; i < voxelMesh[x, y, z].vertices.Count; i++)
+                            {
+                                newVertices.Add(voxelMesh[x, y, z].vertices[i]);
+                            }
+                            for (int i = 0; i < voxelMesh[x, y, z].uvs.Count; i++)
+                            {
+                                newUV.Add(voxelMesh[x, y, z].uvs[i]);
+                            }
+                            //newTriangles.AddRange(item.triangles);
+                            //newVertices.AddRange(item.vertices);
+                            //newUV.AddRange(item.uvs);
+                        }
+
+                    }
+                }
+            }
         }
         catch (System.Exception ex)
         {
