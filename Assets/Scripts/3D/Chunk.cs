@@ -9,6 +9,8 @@ using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 using Unity.IL2CPP.CompilerServices;
 using System.Linq;
+using System.CodeDom;
+
 
 public enum VoxelTypeEnum
 {
@@ -16,6 +18,8 @@ public enum VoxelTypeEnum
     STONE = 1,
     GRASS = 2
 }
+
+
 [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
 public class Chunk : MonoBehaviour
 {
@@ -60,6 +64,22 @@ public class Chunk : MonoBehaviour
     public float gain;
     public float offset;
 
+    public int brushRadius;
+    public int iterations;
+
+    private class VoxelMesh
+    {
+        public List<Vector3> vertices { get; set; }
+        public List<int> triangles { get; set; }
+        public List<Vector2> uvs { get; set; }
+        public VoxelMesh()
+        {
+            vertices = new List<Vector3>();
+            triangles = new List<int>();
+            uvs = new List<Vector2>();
+        }
+    }
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = new Color(1, 1, 0, 0.75F);
@@ -67,7 +87,7 @@ public class Chunk : MonoBehaviour
         {
             for (int z = 0; z < (int)(chunkSize / world.voxelScale); z++)
             {
-                for (int y = (int)((world.worldY / world.voxelScale)-1); y > 0; y--)
+                for (int y = (int)((world.worldY / world.voxelScale) - 1); y > 0; y--)
                 {
 
                     if (Block(x, y, z) != VoxelTypeEnum.AIR && Block(x, y + 1, z) == VoxelTypeEnum.AIR)
@@ -82,8 +102,8 @@ public class Chunk : MonoBehaviour
         }
     }
 
-        // Start is called before the first frame update
-        void Start()
+    // Start is called before the first frame update
+    void Start()
     {
 
         Noise = new RidgeNoise(1);
@@ -130,13 +150,13 @@ public class Chunk : MonoBehaviour
         mesh.Clear();
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         mesh.vertices = newVertices.ToArray();
-        //Debug.Log($"vertices count {newVertices.Count}; list max size {newVertices.Capacity}; chunkX: {chunkX}  ChunkZ: {chunkZ}");
-        //Debug.Log($"vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        Debug.Log($"vertices count {newVertices.Count}; list max size {newVertices.Capacity}; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        Debug.Log($"vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         mesh.uv = newUV.ToArray();
         mesh.triangles = newTriangles.ToArray();
-        //Debug.Log($"111vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        Debug.Log($"111vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         mesh.Optimize();
-        //Debug.Log($"222vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        Debug.Log($"222vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         mesh.RecalculateNormals();
 
         col.sharedMesh = null;
@@ -145,7 +165,7 @@ public class Chunk : MonoBehaviour
         newVertices.Clear();
         newUV.Clear();
         newTriangles.Clear();
-        //Debug.Log($"333vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        Debug.Log($"333vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         faceCount = 0;
     }
 
@@ -463,16 +483,17 @@ public class Chunk : MonoBehaviour
 
     public void draw()
     {
-        
+
         try
         {
+            VoxelMesh[,,] voxelMesh = new VoxelMesh[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), (int)(chunkSize / world.voxelScale)];
             for (int z = 0; z < chunkSize / world.voxelScale - 1; z++)
             {
                 for (int x = 0; x < chunkSize / world.voxelScale - 1; x++)
-            {
-                for (int y = 0; y < world.worldY / world.voxelScale - 1; y++)
                 {
-                    
+                    for (int y = 0; y < world.worldY / world.voxelScale - 1; y++)
+                    {
+
                         byte lookup = 0;
                         //foo2.AddRange(voxels as List<VoxelTypeEnum>);
                         // 7 -- x + y*this->size_y + z * this->size_y * this->size_z
@@ -498,7 +519,7 @@ public class Chunk : MonoBehaviour
                         {
                             Vector3[] verts = new Vector3[12];
                             Vector3 position = new Vector3(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale);
-                            
+
                             // 0 - 1
                             if ((edgeTable[lookup] & 1) != 0)
                                 // x + (y + 1)*this->size_y + (z + 1) * this->size_y * this->size_z
@@ -587,7 +608,7 @@ public class Chunk : MonoBehaviour
                             //glColor3f(1.0f, 1.0f, 1.0f);
 
                             /* looper igjennom entryene i triTable og velger ut de punktene vi skal tegne trianglene mellom, punkt for punkt */
-
+                            VoxelMesh voxel = new VoxelMesh();
                             int i, j;
                             try
                             {
@@ -596,40 +617,46 @@ public class Chunk : MonoBehaviour
                                 for (i = 0; triTable[lookup, i] != -1; i += 3)
                                 {
 
-                                    
-                                        for (j = i; j < (i + 3); j++)
+
+                                    for (j = i; j < (i + 3); j++)
+                                    {
+                                        try
                                         {
-                                            try
-                                            {
                                             int vertIndex = triTable[lookup, j];
-                                            
+
                                             int jVal;
                                             bool exist = vertDic.TryGetValue(vertIndex, out jVal);
                                             if (exist)
                                             {
+                                                //voxel.triangles.Add(faceCount + jVal);
                                                 newTriangles.Add(faceCount + jVal);
-                                                Vector2 texturePos = tGrass;
-                                                //newUV.Add(new Vector2(tUnit * texturePos.x + tUnit, tUnit * texturePos.y));
                                             }
                                             else
                                             {
-                                                newTriangles.Add(faceCount + vertDic.Count);
-                                                vertDic.Add(vertIndex, vertDic.Count);
-                                                newVertices.Add(verts[vertIndex]);
-                                                
                                                 Vector2 texturePos = tGrass;
+                                                //voxel.triangles.Add(faceCount + vertDic.Count);
+                                                //voxel.vertices.Add(verts[vertIndex]);
+                                                //voxel.uvs.Add(new Vector2(tUnit * texturePos.x + tUnit, tUnit * texturePos.y));
+                                                
+                                                vertDic.Add(vertIndex, vertDic.Count);
+
+
+                                                newTriangles.Add(faceCount + vertDic.Count);
+                                                newVertices.Add(verts[vertIndex]);
+
                                                 newUV.Add(new Vector2(tUnit * texturePos.x + tUnit, tUnit * texturePos.y));
                                             }
-                                            }
-                                            catch (System.Exception ex)
-                                            {
+                                        }
+                                        catch (System.Exception ex)
+                                        {
 
-                                                throw;
+                                            throw;
                                         }
-                                        }
-                                    
+                                    }
+
                                 }
                                 faceCount += vertDic.Count;
+                                //voxelMesh[x, y, z] = voxel;
                             }
                             catch (System.Exception ex)
                             {
@@ -642,6 +669,17 @@ public class Chunk : MonoBehaviour
                     }
                 }
             }
+            //SmoothDataSet(voxelMesh, /*this.brushRadius*/5, /*this.iterations*/2);
+            //foreach (var item in voxelMesh)
+            //{
+            //    if (item!=null)
+            //    {
+            //        newTriangles.AddRange(item.triangles);
+            //        newVertices.AddRange(item.vertices);
+            //        newUV.AddRange(item.uvs);
+            //    }
+                
+            //}
         }
         catch (System.Exception ex)
         {
@@ -658,6 +696,124 @@ public class Chunk : MonoBehaviour
         res.z = (z + z2) / 2;
         return res;
     }
+
+    private void SmoothDataSet(VoxelMesh[,,] voxelMesh, int brushRadius, int iterations)
+    {
+        for (int i = 0; i < iterations; i++)
+        {
+            for (int z = 0; z < chunkSize / world.voxelScale - 1; z++)
+            {
+                for (int x = 0; x < chunkSize / world.voxelScale - 1; x++)
+                {
+                    for (int y = 0; y < world.worldY / world.voxelScale - 1; y++)
+                    {
+                        if (voxelMesh[x, y, z] != null)
+                        {
+                            SmoothVoxel(voxelMesh, voxelMesh[x, y, z], x, y, z, brushRadius);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void SmoothVoxel(VoxelMesh[,,] voxelMesh, VoxelMesh voxel, int x, int y, int z, int brushRadius)
+    {
+        HashSet<Vector3> distinctVertices = new HashSet<Vector3>();
+        int maxX = (brushRadius + x) < (int)(chunkSize / world.voxelScale) ? (brushRadius + x) : (int)(chunkSize / world.voxelScale);
+        int maxY = (brushRadius + y) < (int)(world.worldY / world.voxelScale) ? (brushRadius + y) : (int)(world.worldY / world.voxelScale);
+        int maxZ = (brushRadius + z) < (int)(chunkSize / world.voxelScale) ? (brushRadius + z) : (int)(chunkSize / world.voxelScale);
+        int minX = (-brushRadius + x > 0) ? (-brushRadius + x) : 0;
+        int minY = (-brushRadius + y > 0) ? (-brushRadius + y) : 0;
+        int minZ = (-brushRadius + z > 0) ? (-brushRadius + z) : 0;
+        for (int i = minX; i < maxX; i++)
+        {
+            for (int j = minY; j < maxY; j++)
+            {
+                for (int k = minZ; k < maxZ; k++)
+                {
+                    int xDiff = x - i;
+                    int yDiff = y - j;
+                    int zDiff = z - k;
+                    if (Math.Sqrt(double.Parse((xDiff * xDiff + yDiff * yDiff + zDiff * zDiff).ToString())) <= brushRadius)
+                    {
+
+                            if (/*i >= 0 && j >= 0 && k >= 0 && i < (int)(chunkSize / world.voxelScale) && j < (int)(world.worldY / world.voxelScale) && k < (int)(chunkSize / world.voxelScale) &&*/ voxelMesh[i, j, k] != null/* && Math.Sqrt(i * i + j * j + k * k) <= brushRadius*/)
+                            {
+                                for (int c = 0; c < voxelMesh[i, j, k].vertices.Count; c++)
+                                {
+                                    distinctVertices.Add(voxelMesh[i, j, k].vertices[c]);
+                                }
+                            }
+                        
+
+                       
+                    }
+                    
+                }
+            }
+        }
+        Vector3 avgVert = new Vector3();
+        if (distinctVertices.Count!=0)
+        {
+            foreach (var item in distinctVertices)
+            {
+                avgVert.x += item.x;
+                avgVert.y += item.y;
+                avgVert.z += item.z;
+            }
+            avgVert.x = (1 / (2 * distinctVertices.Count)) * avgVert.x;
+            avgVert.y = (1 / (2 * distinctVertices.Count)) * avgVert.y;
+            avgVert.z = (1 / (2 * distinctVertices.Count)) * avgVert.z;
+        }
+
+        for (int i = 0; i < voxelMesh[x, y, z].vertices.Count; i++)
+        {
+            var vox = voxelMesh[x, y, z].vertices[i];
+            vox.x = 0.5f * vox.x + avgVert.x;
+            vox.y = 0.5f * vox.y + avgVert.y;
+            vox.z = 0.5f * vox.z + avgVert.z;
+        }
+
+    }
+    //private void ApplyForNeighbours(VoxelMesh[,,] voxelMesh, int x, int y, int z, Vector3 searchedVertex, List<Vector3> newValues)
+    //{
+    //    for (int i = -1; i < 2; i++)
+    //    {
+    //        for (int j = -1; j < 2; j++)
+    //        {
+    //            for (int k = -1; k < 2; k++)
+    //            {
+    //                if (i != 0 && j != 0 && k != 0)
+    //                {
+    //                    foreach (var item in voxelMesh[i, j, k].vertices)
+    //                    {
+
+    //                    }
+    //                }
+                    
+    //            }
+    //        }
+    //    }
+    //}
+
+    //private void FindVerticesInNeighbours(VoxelMesh[,,] voxelMesh, int x, int y, int z, VoxelMesh voxel, ref Vector3 vertex, List<Vector3> newValues)
+    //{
+    //    for (int i = -1; i < 2; i++)
+    //    {
+    //        for (int j = -1; j < 2; j++)
+    //        {
+    //            for (int k = -1; k < 2; k++)
+    //            {
+    //                foreach (var item in voxelMesh[i, j, k].vertices)
+    //                {
+    //                    ///////////
+    //                    voxel.vertices.Where(vert => vert.x == item.x && vert.y == item.y && vert.z == item.z).Single();
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
 
     public static readonly int[] edgeTable = {
     0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
