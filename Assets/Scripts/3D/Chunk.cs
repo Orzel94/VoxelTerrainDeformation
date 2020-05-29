@@ -66,15 +66,29 @@ public class Chunk : MonoBehaviour
 
     public int brushRadius;
     public int iterations;
-
+    public class Vec3
+    {
+        public float x;
+        public float y;
+        public float z;
+        public Vec3()
+        {
+        }
+            public Vec3(float X, float Y, float Z)
+        {
+            x = X;
+            y = Y;
+            z = Z;
+        }
+    }
     private class VoxelMesh
     {
-        public List<Vector3> vertices { get; set; }
+        public List<Vec3> vertices { get; set; }
         public List<int> triangles { get; set; }
         public List<Vector2> uvs { get; set; }
         public VoxelMesh()
         {
-            vertices = new List<Vector3>();
+            vertices = new List<Vec3>();
             triangles = new List<int>();
             uvs = new List<Vector2>();
         }
@@ -150,6 +164,8 @@ public class Chunk : MonoBehaviour
         mesh.Clear();
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         mesh.vertices = newVertices.ToArray();
+        var xxx = mesh.vertices[0];
+        var xxx2 = newVertices[0];
         Debug.Log($"vertices count {newVertices.Count}; list max size {newVertices.Capacity}; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         Debug.Log($"vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         mesh.uv = newUV.ToArray();
@@ -517,8 +533,8 @@ public class Chunk : MonoBehaviour
                         /* hvis ikke alle punktene er utenfor eller innenfor, sĺ vil vi se nćrmere pĺ ting */
                         if ((lookup != 0) && (lookup != 255))
                         {
-                            Vector3[] verts = new Vector3[12];
-                            Vector3 position = new Vector3(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale);
+                            Vec3[] verts = new Vec3[12];
+                            Vec3 position = new Vec3(chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, chunkZ + z * world.voxelScale);
 
                             // 0 - 1
                             if ((edgeTable[lookup] & 1) != 0)
@@ -674,7 +690,84 @@ public class Chunk : MonoBehaviour
                     }
                 }
             }
-            SmoothDataSet(voxelMesh, /*this.brushRadius*/5, /*this.iterations*/2);
+            SmoothDataSet(ref voxelMesh, /*this.brushRadius*/5, /*this.iterations*/1);
+
+            //////////////////////////////////////////////
+            //int brushRadius = 3;
+            //int iterations = 2;
+            //for (int i = 0; i < iterations; i++)
+            //{
+            //    for (int z = 0; z < chunkSize / world.voxelScale - 1; z++)
+            //    {
+            //        for (int x = 0; x < chunkSize / world.voxelScale - 1; x++)
+            //        {
+            //            for (int y = 0; y < world.worldY / world.voxelScale - 1; y++)
+            //            {
+            //                if (voxelMesh[x, y, z] != null)
+            //                {
+            //                    var vox = voxelMesh[x, y, z];
+            //                    //SmoothVoxel(ref voxelMesh, ref vox, x, y, z, brushRadius);
+            //                    //////////////////////////////////////////////
+            //                    HashSet<Vec3> distinctVertices = new HashSet<Vec3>();
+            //                    int maxX = (brushRadius + x) < (int)(chunkSize / world.voxelScale) ? (brushRadius + x) : (int)(chunkSize / world.voxelScale);
+            //                    int maxY = (brushRadius + y) < (int)(world.worldY / world.voxelScale) ? (brushRadius + y) : (int)(world.worldY / world.voxelScale);
+            //                    int maxZ = (brushRadius + z) < (int)(chunkSize / world.voxelScale) ? (brushRadius + z) : (int)(chunkSize / world.voxelScale);
+            //                    int minX = (-brushRadius + x > 0) ? (-brushRadius + x) : 0;
+            //                    int minY = (-brushRadius + y > 0) ? (-brushRadius + y) : 0;
+            //                    int minZ = (-brushRadius + z > 0) ? (-brushRadius + z) : 0;
+            //                    for (int l = minX; l < maxX; l++)
+            //                    {
+            //                        for (int j = minY; j < maxY; j++)
+            //                        {
+            //                            for (int k = minZ; k < maxZ; k++)
+            //                            {
+            //                                int xDiff = x - l;
+            //                                int yDiff = y - j;
+            //                                int zDiff = z - k;
+            //                                if (Math.Sqrt(double.Parse((xDiff * xDiff + yDiff * yDiff + zDiff * zDiff).ToString())) <= brushRadius)
+            //                                {
+
+            //                                    if (/*i >= 0 && j >= 0 && k >= 0 && i < (int)(chunkSize / world.voxelScale) && j < (int)(world.worldY / world.voxelScale) && k < (int)(chunkSize / world.voxelScale) &&*/ voxelMesh[l, j, k] != null/* && Math.Sqrt(i * i + j * j + k * k) <= brushRadius*/)
+            //                                    {
+            //                                        for (int c = 0; c < voxelMesh[l, j, k].vertices.Count; c++)
+            //                                        {
+            //                                            distinctVertices.Add(voxelMesh[l, j, k].vertices[c]);
+            //                                        }
+            //                                    }
+            //                                }
+
+            //                            }
+            //                        }
+            //                    }
+            //                    Vector3 avgVert = new Vector3();
+            //                    if (distinctVertices.Count != 0)
+            //                    {
+            //                        foreach (var item in distinctVertices)
+            //                        {
+            //                            avgVert.x += item.x;
+            //                            avgVert.y += item.y;
+            //                            avgVert.z += item.z;
+            //                        }
+            //                        avgVert.x = (1 / (2.0f * distinctVertices.Count)) * avgVert.x;
+            //                        avgVert.y = (1 / (2.0f * distinctVertices.Count)) * avgVert.y;
+            //                        avgVert.z = (1 / (2.0f * distinctVertices.Count)) * avgVert.z;
+            //                    }
+
+            //                    for (int m = 0; m < voxelMesh[x, y, z].vertices.Count; m++)
+            //                    {
+            //                        voxelMesh[x, y, z].vertices[m].x = 0.5f * voxelMesh[x, y, z].vertices[m].x + avgVert.x;
+            //                        voxelMesh[x, y, z].vertices[m].y = 0.5f * voxelMesh[x, y, z].vertices[m].y + avgVert.y;
+            //                        voxelMesh[x, y, z].vertices[m].z = 0.5f * voxelMesh[x, y, z].vertices[m].z + avgVert.z;
+            //                    }
+            //                    //////////////////////////////////////////////
+            //                    var vox2 = voxelMesh[x, y, z];
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
+
+            //////////////////////////////////////////////
             //foreach (var item in voxelMesh)
             //{
             for (int z = 0; z < chunkSize / world.voxelScale - 1; z++)
@@ -691,7 +784,7 @@ public class Chunk : MonoBehaviour
                             }
                             for (int i = 0; i < voxelMesh[x, y, z].vertices.Count; i++)
                             {
-                                newVertices.Add(voxelMesh[x, y, z].vertices[i]);
+                                newVertices.Add(new Vector3(voxelMesh[x, y, z].vertices[i].x, voxelMesh[x, y, z].vertices[i].y, voxelMesh[x, y, z].vertices[i].z));
                             }
                             for (int i = 0; i < voxelMesh[x, y, z].uvs.Count; i++)
                             {
@@ -713,16 +806,16 @@ public class Chunk : MonoBehaviour
         }
     }
 
-    public Vector3 Interpolate(float x, float y, float z, float x2, float y2, float z2)
+    public Vec3 Interpolate(float x, float y, float z, float x2, float y2, float z2)
     {
-        Vector3 res = new Vector3();
+        Vec3 res = new Vec3();
         res.x = (x + x2) / 2;
         res.y = (y + y2) / 2;
         res.z = (z + z2) / 2;
         return res;
     }
 
-    private void SmoothDataSet(VoxelMesh[,,] voxelMesh, int brushRadius, int iterations)
+    private void SmoothDataSet(ref VoxelMesh[,,] voxelMesh, int brushRadius, int iterations)
     {
         for (int i = 0; i < iterations; i++)
         {
@@ -734,7 +827,66 @@ public class Chunk : MonoBehaviour
                     {
                         if (voxelMesh[x, y, z] != null)
                         {
-                            SmoothVoxel(voxelMesh, voxelMesh[x, y, z], x, y, z, brushRadius);
+                            var vox = voxelMesh[x, y, z];
+                            SmoothVoxel(ref voxelMesh, ref vox, x, y, z, brushRadius);
+                            //////////////////////////////////////////////
+                            //HashSet<Vec3> distinctVertices = new HashSet<Vec3>();
+                            //int maxX = (brushRadius + x) < (int)(chunkSize / world.voxelScale) ? (brushRadius + x) : (int)(chunkSize / world.voxelScale);
+                            //int maxY = (brushRadius + y) < (int)(world.worldY / world.voxelScale) ? (brushRadius + y) : (int)(world.worldY / world.voxelScale);
+                            //int maxZ = (brushRadius + z) < (int)(chunkSize / world.voxelScale) ? (brushRadius + z) : (int)(chunkSize / world.voxelScale);
+                            //int minX = (-brushRadius + x > 0) ? (-brushRadius + x) : 0;
+                            //int minY = (-brushRadius + y > 0) ? (-brushRadius + y) : 0;
+                            //int minZ = (-brushRadius + z > 0) ? (-brushRadius + z) : 0;
+                            //for (int l = minX; l < maxX; l++)
+                            //{
+                            //    for (int j = minY; j < maxY; j++)
+                            //    {
+                            //        for (int k = minZ; k < maxZ; k++)
+                            //        {
+                            //            int xDiff = x - l;
+                            //            int yDiff = y - j;
+                            //            int zDiff = z - k;
+                            //            if (Math.Sqrt(double.Parse((xDiff * xDiff + yDiff * yDiff + zDiff * zDiff).ToString())) <= brushRadius)
+                            //            {
+
+                            //                if (/*i >= 0 && j >= 0 && k >= 0 && i < (int)(chunkSize / world.voxelScale) && j < (int)(world.worldY / world.voxelScale) && k < (int)(chunkSize / world.voxelScale) &&*/ voxelMesh[l, j, k] != null/* && Math.Sqrt(i * i + j * j + k * k) <= brushRadius*/)
+                            //                {
+                            //                    for (int c = 0; c < voxelMesh[l, j, k].vertices.Count; c++)
+                            //                    {
+                            //                        distinctVertices.Add(voxelMesh[l, j, k].vertices[c]);
+                            //                    }
+                            //                }
+
+
+
+                            //            }
+
+                            //        }
+                            //    }
+                            //}
+                            //Vector3 avgVert = new Vector3();
+                            //if (distinctVertices.Count != 0)
+                            //{
+                            //    foreach (var item in distinctVertices)
+                            //    {
+                            //        avgVert.x += item.x;
+                            //        avgVert.y += item.y;
+                            //        avgVert.z += item.z;
+                            //    }
+                            //    avgVert.x = (1 / (2.0f * distinctVertices.Count)) * avgVert.x;
+                            //    avgVert.y = (1 / (2.0f * distinctVertices.Count)) * avgVert.y;
+                            //    avgVert.z = (1 / (2.0f * distinctVertices.Count)) * avgVert.z;
+                            //}
+
+                            //for (int m = 0; m < voxelMesh[x, y, z].vertices.Count; m++)
+                            //{
+                            //    var vox = voxelMesh[x, y, z].vertices[m];
+                            //    vox.x = 0.5f * vox.x + avgVert.x;
+                            //    vox.y = 0.5f * vox.y + avgVert.y;
+                            //    vox.z = 0.5f * vox.z + avgVert.z;
+                            //    voxelMesh[x, y, z].vertices[m] = vox;
+                            //}
+                            //////////////////////////////////////////////
                         }
                     }
                 }
@@ -742,9 +894,9 @@ public class Chunk : MonoBehaviour
         }
     }
 
-    private void SmoothVoxel(VoxelMesh[,,] voxelMesh, VoxelMesh voxel, int x, int y, int z, int brushRadius)
+    private void SmoothVoxel(ref VoxelMesh[,,] voxelMesh, ref VoxelMesh voxel, int x, int y, int z, int brushRadius)
     {
-        HashSet<Vector3> distinctVertices = new HashSet<Vector3>();
+        HashSet<Vec3> distinctVertices = new HashSet<Vec3>();
         int maxX = (brushRadius + x) < (int)(chunkSize / world.voxelScale) ? (brushRadius + x) : (int)(chunkSize / world.voxelScale);
         int maxY = (brushRadius + y) < (int)(world.worldY / world.voxelScale) ? (brushRadius + y) : (int)(world.worldY / world.voxelScale);
         int maxZ = (brushRadius + z) < (int)(chunkSize / world.voxelScale) ? (brushRadius + z) : (int)(chunkSize / world.voxelScale);
@@ -787,17 +939,18 @@ public class Chunk : MonoBehaviour
                 avgVert.y += item.y;
                 avgVert.z += item.z;
             }
-            avgVert.x = (1 / (2 * distinctVertices.Count)) * avgVert.x;
-            avgVert.y = (1 / (2 * distinctVertices.Count)) * avgVert.y;
-            avgVert.z = (1 / (2 * distinctVertices.Count)) * avgVert.z;
+            avgVert.x = (1 / (2.0f * distinctVertices.Count)) * avgVert.x;
+            avgVert.y = (1 / (2.0f * distinctVertices.Count)) * avgVert.y;
+            avgVert.z = (1 / (2.0f * distinctVertices.Count)) * avgVert.z;
         }
 
-        for (int i = 0; i < voxelMesh[x, y, z].vertices.Count; i++)
+        for (int i = 0; i < voxel.vertices.Count; i++)
         {
-            var vox = voxelMesh[x, y, z].vertices[i];
+            var vox = voxel.vertices[i];
             vox.x = 0.5f * vox.x + avgVert.x;
             vox.y = 0.5f * vox.y + avgVert.y;
-            vox.z = 0.5f * vox.z + avgVert.z;
+            //vox.z = 0.5f * vox.z + avgVert.z;
+            voxel.vertices[i] = vox;
         }
 
     }
