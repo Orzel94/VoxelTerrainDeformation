@@ -10,7 +10,7 @@ using Debug = UnityEngine.Debug;
 using Unity.IL2CPP.CompilerServices;
 using System.Linq;
 using System.CodeDom;
-
+using System.Security.Cryptography.X509Certificates;
 
 public enum VoxelTypeEnum
 {
@@ -25,6 +25,7 @@ public class Chunk : MonoBehaviour
 {
 
     private List<Vector3> newVertices = new List<Vector3>();
+    private List<Vec3> newVerticesV2 = new List<Vec3>();
     private List<int> newTriangles = new List<int>();
     private List<Vector2> newUV = new List<Vector2>();
 
@@ -502,7 +503,7 @@ public class Chunk : MonoBehaviour
 
         try
         {
-            VoxelMesh[,,] voxelMesh = new VoxelMesh[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), (int)(chunkSize / world.voxelScale)];
+            //VoxelMesh[,,] voxelMesh = new VoxelMesh[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), (int)(chunkSize / world.voxelScale)];
             for (int z = 0; z < chunkSize / world.voxelScale - 1; z++)
             {
                 for (int x = 0; x < chunkSize / world.voxelScale - 1; x++)
@@ -629,7 +630,7 @@ public class Chunk : MonoBehaviour
                             try
                             {
                                 //int[,] vertDic = new int[16, 2];
-                                Dictionary<int, int> vertDic = new Dictionary<int, int>();
+                                //Dictionary<int, int> vertDic = new Dictionary<int, int>();
                                 for (i = 0; triTable[lookup, i] != -1; i += 3)
                                 {
 
@@ -639,33 +640,33 @@ public class Chunk : MonoBehaviour
                                         try
                                         {
                                             int vertIndex = triTable[lookup, j];
-
-                                            int jVal;
-                                            bool exist = vertDic.TryGetValue(vertIndex, out jVal);
-                                            if (exist)
+                                            int existingIndex = VertexIndexOf(newVerticesV2, verts[vertIndex]);
+                                            //int jVal;
+                                            //bool exist = vertDic.TryGetValue(vertIndex, out jVal);
+                                            if (existingIndex!=-1)
                                             {
                                                 ///////
-                                                voxel.triangles.Add(faceCount + jVal);
+                                                //voxel.triangles.Add(faceCount + jVal);
                                                 //////////
-                                                //newTriangles.Add(faceCount + jVal);
+                                                newTriangles.Add(existingIndex);
                                             }
                                             else
                                             {
                                                 Vector2 texturePos = tGrass;
                                                 ////////
-                                                voxel.triangles.Add(faceCount + vertDic.Count);
-                                                voxel.vertices.Add(verts[vertIndex]);
-                                                voxel.uvs.Add(new Vector2(tUnit * texturePos.x + tUnit, tUnit * texturePos.y));
+                                                //voxel.triangles.Add(faceCount + vertDic.Count);
+                                                //voxel.vertices.Add(verts[vertIndex]);
+                                                //voxel.uvs.Add(new Vector2(tUnit * texturePos.x + tUnit, tUnit * texturePos.y));
                                                 ////////
 
-                                                //newTriangles.Add(faceCount + vertDic.Count);
-                                                vertDic.Add(vertIndex, vertDic.Count);
+                                                newTriangles.Add(newVerticesV2.Count);
+                                                //vertDic.Add(vertIndex, vertDic.Count);
 
 
 
-                                                //newVertices.Add(verts[vertIndex]);
+                                                newVerticesV2.Add(verts[vertIndex]);
 
-                                                //newUV.Add(new Vector2(tUnit * texturePos.x + tUnit, tUnit * texturePos.y));
+                                                newUV.Add(new Vector2(tUnit * texturePos.x + tUnit, tUnit * texturePos.y));
                                             }
                                         }
                                         catch (System.Exception ex)
@@ -676,8 +677,8 @@ public class Chunk : MonoBehaviour
                                     }
 
                                 }
-                                faceCount += vertDic.Count;
-                                voxelMesh[x, y, z] = voxel;
+                                //faceCount += vertDic.Count;
+                                //voxelMesh[x, y, z] = voxel;
                             }
                             catch (System.Exception ex)
                             {
@@ -690,7 +691,11 @@ public class Chunk : MonoBehaviour
                     }
                 }
             }
-            SmoothDataSet(ref voxelMesh, /*this.brushRadius*/5, /*this.iterations*/1);
+            foreach (var item in newVerticesV2)
+            {
+                newVertices.Add(new Vector3(item.x, item.y, item.z));
+            }
+            //SmoothDataSet(ref voxelMesh, /*this.brushRadius*/5, /*this.iterations*/1);
 
             //////////////////////////////////////////////
             //int brushRadius = 3;
@@ -770,34 +775,34 @@ public class Chunk : MonoBehaviour
             //////////////////////////////////////////////
             //foreach (var item in voxelMesh)
             //{
-            for (int z = 0; z < chunkSize / world.voxelScale - 1; z++)
-            {
-                for (int x = 0; x < chunkSize / world.voxelScale - 1; x++)
-                {
-                    for (int y = 0; y < world.worldY / world.voxelScale - 1; y++)
-                    {
-                        if (voxelMesh[x, y, z] != null)
-                        {
-                            for (int i = 0; i < voxelMesh[x, y, z].triangles.Count; i++)
-                            {
-                                newTriangles.Add(voxelMesh[x, y, z].triangles[i]);
-                            }
-                            for (int i = 0; i < voxelMesh[x, y, z].vertices.Count; i++)
-                            {
-                                newVertices.Add(new Vector3(voxelMesh[x, y, z].vertices[i].x, voxelMesh[x, y, z].vertices[i].y, voxelMesh[x, y, z].vertices[i].z));
-                            }
-                            for (int i = 0; i < voxelMesh[x, y, z].uvs.Count; i++)
-                            {
-                                newUV.Add(voxelMesh[x, y, z].uvs[i]);
-                            }
-                            //newTriangles.AddRange(item.triangles);
-                            //newVertices.AddRange(item.vertices);
-                            //newUV.AddRange(item.uvs);
-                        }
+            //for (int z = 0; z < chunkSize / world.voxelScale - 1; z++)
+            //{
+            //    for (int x = 0; x < chunkSize / world.voxelScale - 1; x++)
+            //    {
+            //        for (int y = 0; y < world.worldY / world.voxelScale - 1; y++)
+            //        {
+            //            if (voxelMesh[x, y, z] != null)
+            //            {
+            //                for (int i = 0; i < voxelMesh[x, y, z].triangles.Count; i++)
+            //                {
+            //                    newTriangles.Add(voxelMesh[x, y, z].triangles[i]);
+            //                }
+            //                for (int i = 0; i < voxelMesh[x, y, z].vertices.Count; i++)
+            //                {
+            //                    newVertices.Add(new Vector3(voxelMesh[x, y, z].vertices[i].x, voxelMesh[x, y, z].vertices[i].y, voxelMesh[x, y, z].vertices[i].z));
+            //                }
+            //                for (int i = 0; i < voxelMesh[x, y, z].uvs.Count; i++)
+            //                {
+            //                    newUV.Add(voxelMesh[x, y, z].uvs[i]);
+            //                }
+            //                //newTriangles.AddRange(item.triangles);
+            //                //newVertices.AddRange(item.vertices);
+            //                //newUV.AddRange(item.uvs);
+            //            }
 
-                    }
-                }
-            }
+            //        }
+            //    }
+            //}
         }
         catch (System.Exception ex)
         {
@@ -805,7 +810,18 @@ public class Chunk : MonoBehaviour
             throw;
         }
     }
-
+    public int VertexIndexOf(List<Vec3> vertices, Vec3 searchedVertex)
+    {
+        for (int i = 0; i < vertices.Count; i++)
+        {
+            var vertex = vertices[i];
+            if (vertex.x==searchedVertex.x && vertex.y == searchedVertex.y && vertex.z == searchedVertex.z)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
     public Vec3 Interpolate(float x, float y, float z, float x2, float y2, float z2)
     {
         Vec3 res = new Vec3();
