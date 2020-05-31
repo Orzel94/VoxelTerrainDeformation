@@ -691,6 +691,41 @@ public class Chunk : MonoBehaviour
                     }
                 }
             }
+            for (int c = 0; c < 5; c++)
+            {
+
+
+                for (int i = 0; i < newVerticesV2.Count; i++)
+                {
+                    float avgAdjX = 0;
+                    float avgAdjY = 0;
+                    float avgAdjZ = 0;
+                    var x = FindAdjacentVertices(i);
+                    foreach (var item in x)
+                    {
+                        try
+                        {
+                            var vert = newVerticesV2[newTriangles[item]];
+                            avgAdjX += vert.x;
+                            avgAdjY += vert.y;
+                            avgAdjZ += vert.z;
+                        }
+                        catch (Exception ex)
+                        {
+
+                            throw;
+                        }
+
+                    }
+                    avgAdjX = avgAdjX / x.Count;
+                    avgAdjY = avgAdjY / x.Count;
+                    avgAdjZ = avgAdjZ / x.Count;
+                    var targetVertex = newVerticesV2[i];
+                    targetVertex.x = (targetVertex.x / 2.0f) + (avgAdjX / 2.0f);
+                    targetVertex.y = (targetVertex.y / 2.0f) + (avgAdjY / 2.0f);
+                    targetVertex.z = (targetVertex.z / 2.0f) + (avgAdjZ / 2.0f);
+                }
+            }
             foreach (var item in newVerticesV2)
             {
                 newVertices.Add(new Vector3(item.x, item.y, item.z));
@@ -831,147 +866,184 @@ public class Chunk : MonoBehaviour
         return res;
     }
 
-    private void SmoothDataSet(ref VoxelMesh[,,] voxelMesh, int brushRadius, int iterations)
+    public List<int> FindAdjacentVertices(int vertexIndex)
     {
-        for (int i = 0; i < iterations; i++)
+        List<int> adjVertIndexes = new List<int>();
+        try
         {
-            for (int z = 0; z < chunkSize / world.voxelScale - 1; z++)
+
+       
+        
+        List<int> v = newTriangles.Select((b, i) => b == vertexIndex ? i : -1).Where(i => i != -1).ToList();
+        foreach (var item in v)
+        {
+            var x = item % 3;
+            if (x==0)
             {
-                for (int x = 0; x < chunkSize / world.voxelScale - 1; x++)
-                {
-                    for (int y = 0; y < world.worldY / world.voxelScale - 1; y++)
-                    {
-                        if (voxelMesh[x, y, z] != null)
-                        {
-                            var vox = voxelMesh[x, y, z];
-                            SmoothVoxel(ref voxelMesh, ref vox, x, y, z, brushRadius);
-                            //////////////////////////////////////////////
-                            //HashSet<Vec3> distinctVertices = new HashSet<Vec3>();
-                            //int maxX = (brushRadius + x) < (int)(chunkSize / world.voxelScale) ? (brushRadius + x) : (int)(chunkSize / world.voxelScale);
-                            //int maxY = (brushRadius + y) < (int)(world.worldY / world.voxelScale) ? (brushRadius + y) : (int)(world.worldY / world.voxelScale);
-                            //int maxZ = (brushRadius + z) < (int)(chunkSize / world.voxelScale) ? (brushRadius + z) : (int)(chunkSize / world.voxelScale);
-                            //int minX = (-brushRadius + x > 0) ? (-brushRadius + x) : 0;
-                            //int minY = (-brushRadius + y > 0) ? (-brushRadius + y) : 0;
-                            //int minZ = (-brushRadius + z > 0) ? (-brushRadius + z) : 0;
-                            //for (int l = minX; l < maxX; l++)
-                            //{
-                            //    for (int j = minY; j < maxY; j++)
-                            //    {
-                            //        for (int k = minZ; k < maxZ; k++)
-                            //        {
-                            //            int xDiff = x - l;
-                            //            int yDiff = y - j;
-                            //            int zDiff = z - k;
-                            //            if (Math.Sqrt(double.Parse((xDiff * xDiff + yDiff * yDiff + zDiff * zDiff).ToString())) <= brushRadius)
-                            //            {
-
-                            //                if (/*i >= 0 && j >= 0 && k >= 0 && i < (int)(chunkSize / world.voxelScale) && j < (int)(world.worldY / world.voxelScale) && k < (int)(chunkSize / world.voxelScale) &&*/ voxelMesh[l, j, k] != null/* && Math.Sqrt(i * i + j * j + k * k) <= brushRadius*/)
-                            //                {
-                            //                    for (int c = 0; c < voxelMesh[l, j, k].vertices.Count; c++)
-                            //                    {
-                            //                        distinctVertices.Add(voxelMesh[l, j, k].vertices[c]);
-                            //                    }
-                            //                }
-
-
-
-                            //            }
-
-                            //        }
-                            //    }
-                            //}
-                            //Vector3 avgVert = new Vector3();
-                            //if (distinctVertices.Count != 0)
-                            //{
-                            //    foreach (var item in distinctVertices)
-                            //    {
-                            //        avgVert.x += item.x;
-                            //        avgVert.y += item.y;
-                            //        avgVert.z += item.z;
-                            //    }
-                            //    avgVert.x = (1 / (2.0f * distinctVertices.Count)) * avgVert.x;
-                            //    avgVert.y = (1 / (2.0f * distinctVertices.Count)) * avgVert.y;
-                            //    avgVert.z = (1 / (2.0f * distinctVertices.Count)) * avgVert.z;
-                            //}
-
-                            //for (int m = 0; m < voxelMesh[x, y, z].vertices.Count; m++)
-                            //{
-                            //    var vox = voxelMesh[x, y, z].vertices[m];
-                            //    vox.x = 0.5f * vox.x + avgVert.x;
-                            //    vox.y = 0.5f * vox.y + avgVert.y;
-                            //    vox.z = 0.5f * vox.z + avgVert.z;
-                            //    voxelMesh[x, y, z].vertices[m] = vox;
-                            //}
-                            //////////////////////////////////////////////
-                        }
-                    }
-                }
+                adjVertIndexes.Add(item + 1);
+                adjVertIndexes.Add(item + 2);
+            }
+            else if (x==1)
+            {
+                adjVertIndexes.Add(item - 1);
+                adjVertIndexes.Add(item + 1);
+            }
+            else
+            {
+                adjVertIndexes.Add(item - 1);
+                adjVertIndexes.Add(item - 2);
             }
         }
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+        return adjVertIndexes;
     }
 
-    private void SmoothVoxel(ref VoxelMesh[,,] voxelMesh, ref VoxelMesh voxel, int x, int y, int z, int brushRadius)
-    {
-        HashSet<Vec3> distinctVertices = new HashSet<Vec3>();
-        int maxX = (brushRadius + x) < (int)(chunkSize / world.voxelScale) ? (brushRadius + x) : (int)(chunkSize / world.voxelScale);
-        int maxY = (brushRadius + y) < (int)(world.worldY / world.voxelScale) ? (brushRadius + y) : (int)(world.worldY / world.voxelScale);
-        int maxZ = (brushRadius + z) < (int)(chunkSize / world.voxelScale) ? (brushRadius + z) : (int)(chunkSize / world.voxelScale);
-        int minX = (-brushRadius + x > 0) ? (-brushRadius + x) : 0;
-        int minY = (-brushRadius + y > 0) ? (-brushRadius + y) : 0;
-        int minZ = (-brushRadius + z > 0) ? (-brushRadius + z) : 0;
-        for (int i = minX; i < maxX; i++)
-        {
-            for (int j = minY; j < maxY; j++)
-            {
-                for (int k = minZ; k < maxZ; k++)
-                {
-                    int xDiff = x - i;
-                    int yDiff = y - j;
-                    int zDiff = z - k;
-                    if (Math.Sqrt(double.Parse((xDiff * xDiff + yDiff * yDiff + zDiff * zDiff).ToString())) <= brushRadius)
-                    {
+    //private void SmoothDataSet(ref VoxelMesh[,,] voxelMesh, int brushRadius, int iterations)
+    //{
+    //    for (int i = 0; i < iterations; i++)
+    //    {
+    //        for (int z = 0; z < chunkSize / world.voxelScale - 1; z++)
+    //        {
+    //            for (int x = 0; x < chunkSize / world.voxelScale - 1; x++)
+    //            {
+    //                for (int y = 0; y < world.worldY / world.voxelScale - 1; y++)
+    //                {
+    //                    if (voxelMesh[x, y, z] != null)
+    //                    {
+    //                        var vox = voxelMesh[x, y, z];
+    //                        SmoothVoxel(ref voxelMesh, ref vox, x, y, z, brushRadius);
+    //                        //////////////////////////////////////////////
+    //                        //HashSet<Vec3> distinctVertices = new HashSet<Vec3>();
+    //                        //int maxX = (brushRadius + x) < (int)(chunkSize / world.voxelScale) ? (brushRadius + x) : (int)(chunkSize / world.voxelScale);
+    //                        //int maxY = (brushRadius + y) < (int)(world.worldY / world.voxelScale) ? (brushRadius + y) : (int)(world.worldY / world.voxelScale);
+    //                        //int maxZ = (brushRadius + z) < (int)(chunkSize / world.voxelScale) ? (brushRadius + z) : (int)(chunkSize / world.voxelScale);
+    //                        //int minX = (-brushRadius + x > 0) ? (-brushRadius + x) : 0;
+    //                        //int minY = (-brushRadius + y > 0) ? (-brushRadius + y) : 0;
+    //                        //int minZ = (-brushRadius + z > 0) ? (-brushRadius + z) : 0;
+    //                        //for (int l = minX; l < maxX; l++)
+    //                        //{
+    //                        //    for (int j = minY; j < maxY; j++)
+    //                        //    {
+    //                        //        for (int k = minZ; k < maxZ; k++)
+    //                        //        {
+    //                        //            int xDiff = x - l;
+    //                        //            int yDiff = y - j;
+    //                        //            int zDiff = z - k;
+    //                        //            if (Math.Sqrt(double.Parse((xDiff * xDiff + yDiff * yDiff + zDiff * zDiff).ToString())) <= brushRadius)
+    //                        //            {
 
-                            if (/*i >= 0 && j >= 0 && k >= 0 && i < (int)(chunkSize / world.voxelScale) && j < (int)(world.worldY / world.voxelScale) && k < (int)(chunkSize / world.voxelScale) &&*/ voxelMesh[i, j, k] != null/* && Math.Sqrt(i * i + j * j + k * k) <= brushRadius*/)
-                            {
-                                for (int c = 0; c < voxelMesh[i, j, k].vertices.Count; c++)
-                                {
-                                    distinctVertices.Add(voxelMesh[i, j, k].vertices[c]);
-                                }
-                            }
+    //                        //                if (/*i >= 0 && j >= 0 && k >= 0 && i < (int)(chunkSize / world.voxelScale) && j < (int)(world.worldY / world.voxelScale) && k < (int)(chunkSize / world.voxelScale) &&*/ voxelMesh[l, j, k] != null/* && Math.Sqrt(i * i + j * j + k * k) <= brushRadius*/)
+    //                        //                {
+    //                        //                    for (int c = 0; c < voxelMesh[l, j, k].vertices.Count; c++)
+    //                        //                    {
+    //                        //                        distinctVertices.Add(voxelMesh[l, j, k].vertices[c]);
+    //                        //                    }
+    //                        //                }
+
+
+
+    //                        //            }
+
+    //                        //        }
+    //                        //    }
+    //                        //}
+    //                        //Vector3 avgVert = new Vector3();
+    //                        //if (distinctVertices.Count != 0)
+    //                        //{
+    //                        //    foreach (var item in distinctVertices)
+    //                        //    {
+    //                        //        avgVert.x += item.x;
+    //                        //        avgVert.y += item.y;
+    //                        //        avgVert.z += item.z;
+    //                        //    }
+    //                        //    avgVert.x = (1 / (2.0f * distinctVertices.Count)) * avgVert.x;
+    //                        //    avgVert.y = (1 / (2.0f * distinctVertices.Count)) * avgVert.y;
+    //                        //    avgVert.z = (1 / (2.0f * distinctVertices.Count)) * avgVert.z;
+    //                        //}
+
+    //                        //for (int m = 0; m < voxelMesh[x, y, z].vertices.Count; m++)
+    //                        //{
+    //                        //    var vox = voxelMesh[x, y, z].vertices[m];
+    //                        //    vox.x = 0.5f * vox.x + avgVert.x;
+    //                        //    vox.y = 0.5f * vox.y + avgVert.y;
+    //                        //    vox.z = 0.5f * vox.z + avgVert.z;
+    //                        //    voxelMesh[x, y, z].vertices[m] = vox;
+    //                        //}
+    //                        //////////////////////////////////////////////
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
+
+    //private void SmoothVoxel(ref VoxelMesh[,,] voxelMesh, ref VoxelMesh voxel, int x, int y, int z, int brushRadius)
+    //{
+    //    HashSet<Vec3> distinctVertices = new HashSet<Vec3>();
+    //    int maxX = (brushRadius + x) < (int)(chunkSize / world.voxelScale) ? (brushRadius + x) : (int)(chunkSize / world.voxelScale);
+    //    int maxY = (brushRadius + y) < (int)(world.worldY / world.voxelScale) ? (brushRadius + y) : (int)(world.worldY / world.voxelScale);
+    //    int maxZ = (brushRadius + z) < (int)(chunkSize / world.voxelScale) ? (brushRadius + z) : (int)(chunkSize / world.voxelScale);
+    //    int minX = (-brushRadius + x > 0) ? (-brushRadius + x) : 0;
+    //    int minY = (-brushRadius + y > 0) ? (-brushRadius + y) : 0;
+    //    int minZ = (-brushRadius + z > 0) ? (-brushRadius + z) : 0;
+    //    for (int i = minX; i < maxX; i++)
+    //    {
+    //        for (int j = minY; j < maxY; j++)
+    //        {
+    //            for (int k = minZ; k < maxZ; k++)
+    //            {
+    //                int xDiff = x - i;
+    //                int yDiff = y - j;
+    //                int zDiff = z - k;
+    //                if (Math.Sqrt(double.Parse((xDiff * xDiff + yDiff * yDiff + zDiff * zDiff).ToString())) <= brushRadius)
+    //                {
+
+    //                        if (/*i >= 0 && j >= 0 && k >= 0 && i < (int)(chunkSize / world.voxelScale) && j < (int)(world.worldY / world.voxelScale) && k < (int)(chunkSize / world.voxelScale) &&*/ voxelMesh[i, j, k] != null/* && Math.Sqrt(i * i + j * j + k * k) <= brushRadius*/)
+    //                        {
+    //                            for (int c = 0; c < voxelMesh[i, j, k].vertices.Count; c++)
+    //                            {
+    //                                distinctVertices.Add(voxelMesh[i, j, k].vertices[c]);
+    //                            }
+    //                        }
                         
 
                        
-                    }
+    //                }
                     
-                }
-            }
-        }
-        Vector3 avgVert = new Vector3();
-        if (distinctVertices.Count!=0)
-        {
-            foreach (var item in distinctVertices)
-            {
-                avgVert.x += item.x;
-                avgVert.y += item.y;
-                avgVert.z += item.z;
-            }
-            avgVert.x = (1 / (2.0f * distinctVertices.Count)) * avgVert.x;
-            avgVert.y = (1 / (2.0f * distinctVertices.Count)) * avgVert.y;
-            avgVert.z = (1 / (2.0f * distinctVertices.Count)) * avgVert.z;
-        }
+    //            }
+    //        }
+    //    }
+    //    Vector3 avgVert = new Vector3();
+    //    if (distinctVertices.Count!=0)
+    //    {
+    //        foreach (var item in distinctVertices)
+    //        {
+    //            avgVert.x += item.x;
+    //            avgVert.y += item.y;
+    //            avgVert.z += item.z;
+    //        }
+    //        avgVert.x = (1 / (2.0f * distinctVertices.Count)) * avgVert.x;
+    //        avgVert.y = (1 / (2.0f * distinctVertices.Count)) * avgVert.y;
+    //        avgVert.z = (1 / (2.0f * distinctVertices.Count)) * avgVert.z;
+    //    }
 
-        for (int i = 0; i < voxel.vertices.Count; i++)
-        {
-            var vox = voxel.vertices[i];
-            vox.x = 0.5f * vox.x + avgVert.x;
-            vox.y = 0.5f * vox.y + avgVert.y;
-            //vox.z = 0.5f * vox.z + avgVert.z;
-            voxel.vertices[i] = vox;
-        }
+    //    for (int i = 0; i < voxel.vertices.Count; i++)
+    //    {
+    //        var vox = voxel.vertices[i];
+    //        vox.x = 0.5f * vox.x + avgVert.x;
+    //        vox.y = 0.5f * vox.y + avgVert.y;
+    //        //vox.z = 0.5f * vox.z + avgVert.z;
+    //        voxel.vertices[i] = vox;
+    //    }
 
-    }
-    //private void ApplyForNeighbours(VoxelMesh[,,] voxelMesh, int x, int y, int z, Vector3 searchedVertex, List<Vector3> newValues)
-    //{
+    //}
+    ////private void ApplyForNeighbours(VoxelMesh[,,] voxelMesh, int x, int y, int z, Vector3 searchedVertex, List<Vector3> newValues)
+    ////{
     //    for (int i = -1; i < 2; i++)
     //    {
     //        for (int j = -1; j < 2; j++)
