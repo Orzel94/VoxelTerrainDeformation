@@ -183,7 +183,7 @@ PrefabInstance:
     - target: {fileID: 3300000, guid: fc8810858435db9408d309b59fa0cc0e, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 1156764340}
+      objectReference: {fileID: 1613361552}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fc8810858435db9408d309b59fa0cc0e, type: 3}
 --- !u!1 &282515930
@@ -531,7 +531,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a67b6f52f745a24409a266b454ef3c73, type: 3}
---- !u!43 &1156764340
+--- !u!43 &1613361552
 Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -724,16 +724,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcecfcde3c6b8be4abd70e915387a107, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  worldX: 256
+  worldX: 512
   worldY: 64
-  worldZ: 256
+  worldZ: 512
   worldYMultiplier: 2
   exp: 2.72
   gain: 1.2
   offset: 0.58
   chunk: {fileID: 413478663061862758, guid: 21c15ec5cc7a9fc42a4c04d79a0f2f21, type: 3}
-  chunkSize: 32
-  voxelScale: 0.5
+  chunkSize: 128
+  voxelScale: 2
 --- !u!4 &1624094804
 Transform:
   m_ObjectHideFlags: 0

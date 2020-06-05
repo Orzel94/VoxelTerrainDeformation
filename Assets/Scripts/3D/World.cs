@@ -46,8 +46,8 @@ Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
                 {
 
                     //Create a temporary Gameobject for the new chunk instead of using chunks[x,y,z]
-                    GameObject newChunk = Instantiate(chunk, new Vector3(x * chunkSize/2,
-                     y * chunkSize, z * chunkSize/2), new Quaternion(0, 0, 0, 0)) as GameObject;
+                    GameObject newChunk = Instantiate(chunk, new Vector3(x * chunkSize/2-0.5f,
+                     y * chunkSize, z * chunkSize/2-0.5f), new Quaternion(0, 0, 0, 0)) as GameObject;
 
                     //Now instead of using a temporary variable for the script assign it
                     //to chunks[x,y,z] and use it instead of the old \"newChunkScript\" 
