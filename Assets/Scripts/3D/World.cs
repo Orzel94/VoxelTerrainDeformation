@@ -29,11 +29,13 @@ public class World : MonoBehaviour
     [Tooltip("size of siungle voxel - value must be power of 2")]
     public float voxelScale;
 
+    private bool terrainGenerated;
+    public bool globalUpdateNeeded;
     // Start is called before the first frame update
     void Start()
     {
-
-
+        terrainGenerated = false;
+        globalUpdateNeeded = true;
 
         chunks = new Chunk[Mathf.FloorToInt(worldX / chunkSize),
 Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
@@ -46,8 +48,8 @@ Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
                 {
 
                     //Create a temporary Gameobject for the new chunk instead of using chunks[x,y,z]
-                    GameObject newChunk = Instantiate(chunk, new Vector3(x * chunkSize/2-0.5f,
-                     y * chunkSize, z * chunkSize/2-0.5f), new Quaternion(0, 0, 0, 0)) as GameObject;
+                    GameObject newChunk = Instantiate(chunk, new Vector3(x * chunkSize/2,
+                     y * chunkSize, z * chunkSize/2), new Quaternion(0, 0, 0, 0)) as GameObject;
 
                     //Now instead of using a temporary variable for the script assign it
                     //to chunks[x,y,z] and use it instead of the old \"newChunkScript\" 
@@ -58,6 +60,7 @@ Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
                     chunks[x, y, z].chunkY = y * chunkSize;
                     chunks[x, y, z].chunkZ = z * chunkSize/2;
                     chunks[x, y, z].voxelScale = voxelScale;
+                    chunks[x, y, z].SetParentWorld(this);
                     //chunks[x, y, z].GenerateTerrain();
 
                 }
@@ -66,10 +69,52 @@ Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
 
     }
 
+    public VoxelTypeEnum SearchBlock(int x, int y, int z)
+    {
+        return VoxelTypeEnum.AIR;
+        var chunk = chunks[Mathf.FloorToInt(x / (chunkSize / 2)), 1, Mathf.FloorToInt(z / (chunkSize / 2))];
+        return chunk.Block((int)((x-chunk.chunkX)/voxelScale), (int)((y - chunk.chunkY) / voxelScale), (int)((z - chunk.chunkZ) / voxelScale));
+    }
+
     // Update is called once per frame
     void Update()
     {
-
+        //if (terrainGenerated == false && globalUpdateNeeded)
+        //{
+        //    bool generated = true;
+        //    foreach (var item in chunks)
+        //    {
+        //        if (item.terrainGenerated == false)
+        //        {
+        //            generated = false;
+        //            break;
+        //        }
+        //    }
+        //    if (generated)
+        //    {
+        //        terrainGenerated = true;
+        //    }
+        //}
+        //else if (terrainGenerated && globalUpdateNeeded)
+        //{
+        //    foreach (var item in chunks)
+        //    {
+        //        //item.marchCubes(Chunk.marchingCubeMode.edges);
+        //    }
+        //    foreach (var item in chunks)
+        //    {
+        //        //item.SmoothVertices();
+        //        //item.smoothingDone = true;
+        //        //item.meshUpdateNeeded = true;
+        //    }
+        //    foreach (var item in chunks)
+        //    {
+        //        //item.SmoothVertices();
+        //        item.smoothingDone = true;
+        //        item.meshUpdateNeeded = true;
+        //    }
+        //    globalUpdateNeeded = false;
+        //}
     }
 
 }

@@ -67,6 +67,17 @@ public class Chunk : MonoBehaviour
 
     public int brushRadius;
     public int iterations;
+
+
+    //Thread synchronization flags
+    public bool terrainGenerated;
+    public bool terrainThreadStarted;
+    public bool marchingCubesDone;
+    public bool marchingEdgesDone;
+    public bool smoothingDone;
+    public bool renderingDone;
+
+    private World parentWorld;
     public class Vec3
     {
         public float x;
@@ -120,7 +131,7 @@ public class Chunk : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        terrainThreadStarted = false;
         Noise = new RidgeNoise(1);
 
         //Noise = new BillowNoise(4);
@@ -135,14 +146,15 @@ public class Chunk : MonoBehaviour
         Noise.Exponent = world.exp;// 1.0f;
         Noise.Gain = world.gain;// 1.2f;
         Noise.Offset = world.offset;// 0.7f;
+        smoothingDone = false;
         Task.Factory.StartNew(() =>
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
             GenerateTerrain();
-            terrainGenerationEnded = true;
-
+            terrainGenerated = true;
+            smoothingDone = true;
             stopwatch.Stop();
             UnityEngine.Debug.Log($"ElapsedMilliseconds: {stopwatch.ElapsedMilliseconds}");
 
@@ -153,11 +165,31 @@ public class Chunk : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (meshUpdateNeeded && terrainGenerationEnded)
+        //if (!terrainGenerated&&!terrainThreadStarted)
+        //{
+        //    terrainThreadStarted = true;
+        //    Task.Factory.StartNew(() =>
+        //    {
+        //        var stopwatch = new Stopwatch();
+        //        stopwatch.Start();
+
+        //        GenerateTerrain();
+        //        terrainGenerated = true;
+        //        smoothingDone = true;
+        //        stopwatch.Stop();
+        //        UnityEngine.Debug.Log($"ElapsedMilliseconds: {stopwatch.ElapsedMilliseconds}");
+
+        //    });
+        //}
+        if (meshUpdateNeeded && smoothingDone)
         {
             UpdateMesh();
             meshUpdateNeeded = false;
         }
+    }
+    public void SetParentWorld(World world)
+    {
+        this.parentWorld = world;
     }
 
     void UpdateMesh()
@@ -186,7 +218,7 @@ public class Chunk : MonoBehaviour
         faceCount = 0;
     }
 
-    VoxelTypeEnum Block(int x, int y, int z)
+    public VoxelTypeEnum Block(int x, int y, int z)
     {
         try
         {
@@ -194,7 +226,9 @@ public class Chunk : MonoBehaviour
         }
         catch (Exception ex)
         {
-            return VoxelTypeEnum.AIR;
+            var sth = this.parentWorld.SearchBlock((int)(chunkX + x * world.voxelScale), (int)(chunkY + y * world.voxelScale), (int)(chunkZ + z * world.voxelScale));
+            return sth;
+            //return VoxelTypeEnum.AIR;
         }
 
         //return world.Block(x + chunkX, y + chunkY, z + chunkZ); // Don't replace the world.Block in this line!
@@ -245,10 +279,11 @@ public class Chunk : MonoBehaviour
         }
         //Task.Factory.StartNew(() =>
         //{
-        draw();
+        //draw();
         //GenerateMesh();
         //    terrainGenerationEnded = true;
         //});
+        marchCubes(marchingCubeMode.both);
 
     }
 
@@ -496,21 +531,43 @@ public class Chunk : MonoBehaviour
         }
         return (int)rValue;
     }
+    public enum marchingCubeMode
+    {
+        inner=0,
+        edges=1,
+        both=2
+    }
 
-
-    public void draw()
+    public void marchCubes(marchingCubeMode mode)
     {
 
         try
         {
-            //VoxelMesh[,,] voxelMesh = new VoxelMesh[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), (int)(chunkSize / world.voxelScale)];
-            for (int z = 0; z < chunkSize / world.voxelScale - 1; z++)
+            int z = 0;
+            int x = 0;
+            int y = 0;
+            int horizontalEnd = (int)(chunkSize / world.voxelScale - 1);
+            if (mode == marchingCubeMode.inner)
             {
-                for (int x = 0; x < chunkSize / world.voxelScale - 1; x++)
+                z++;
+                x++;
+                horizontalEnd -= 1;
+            }
+            //VoxelMesh[,,] voxelMesh = new VoxelMesh[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), (int)(chunkSize / world.voxelScale)];
+            for (; z < horizontalEnd; z++)
+            {
+                for (; x < horizontalEnd; x++)
                 {
-                    for (int y = 0; y < world.worldY / world.voxelScale - 1; y++)
+                    for (; y < world.worldY / world.voxelScale - 1; y++)
                     {
-
+                        if (mode==marchingCubeMode.edges)
+                        {
+                            if ((x != 0 && x != horizontalEnd - 1) && (z != 0 && z != horizontalEnd - 1))
+                            {
+                                break;
+                            }
+                        }
+                        
                         byte lookup = 0;
                         //foo2.AddRange(voxels as List<VoxelTypeEnum>);
                         // 7 -- x + y*this->size_y + z * this->size_y * this->size_z
@@ -691,45 +748,7 @@ public class Chunk : MonoBehaviour
                     }
                 }
             }
-            for (int c = 0; c < 5; c++)
-            {
 
-
-                for (int i = 0; i < newVerticesV2.Count; i++)
-                {
-                    float avgAdjX = 0;
-                    float avgAdjY = 0;
-                    float avgAdjZ = 0;
-                    var x = FindAdjacentVertices(i);
-                    foreach (var item in x)
-                    {
-                        try
-                        {
-                            var vert = newVerticesV2[newTriangles[item]];
-                            avgAdjX += vert.x;
-                            avgAdjY += vert.y;
-                            avgAdjZ += vert.z;
-                        }
-                        catch (Exception ex)
-                        {
-
-                            throw;
-                        }
-
-                    }
-                    avgAdjX = avgAdjX / x.Count;
-                    avgAdjY = avgAdjY / x.Count;
-                    avgAdjZ = avgAdjZ / x.Count;
-                    var targetVertex = newVerticesV2[i];
-                    targetVertex.x = (targetVertex.x / 2.0f) + (avgAdjX / 2.0f);
-                    targetVertex.y = (targetVertex.y / 2.0f) + (avgAdjY / 2.0f);
-                    targetVertex.z = (targetVertex.z / 2.0f) + (avgAdjZ / 2.0f);
-                }
-            }
-            foreach (var item in newVerticesV2)
-            {
-                newVertices.Add(new Vector3(item.x, item.y, item.z));
-            }
             //SmoothDataSet(ref voxelMesh, /*this.brushRadius*/5, /*this.iterations*/1);
 
             //////////////////////////////////////////////
@@ -838,6 +857,10 @@ public class Chunk : MonoBehaviour
             //        }
             //    }
             //}
+            foreach (var item in newVerticesV2)
+            {
+                newVertices.Add(new Vector3(item.x, item.y, item.z));
+            }
         }
         catch (System.Exception ex)
         {
@@ -845,6 +868,57 @@ public class Chunk : MonoBehaviour
             throw;
         }
     }
+    public void SmoothVertices()
+    {
+        for (int c = 0; c < 5; c++)
+        {
+
+
+            for (int i = 0; i < newVerticesV2.Count; i++)
+            {
+                var targetVertex = newVerticesV2[i];
+                if (targetVertex.x == chunkX || targetVertex.x == chunkX + chunkSize
+                    || targetVertex.z == chunkZ || targetVertex.z == chunkZ + chunkSize ||
+                    targetVertex.y == chunkY || targetVertex.y == chunkY + world.worldY)
+                {
+                    continue;
+                }
+                float avgAdjX = 0;
+                float avgAdjY = 0;
+                float avgAdjZ = 0;
+                var x = FindAdjacentVertices(i);
+                foreach (var item in x)
+                {
+                    try
+                    {
+                        var vert = newVerticesV2[newTriangles[item]];
+                        avgAdjX += vert.x;
+                        avgAdjY += vert.y;
+                        avgAdjZ += vert.z;
+                    }
+                    catch (Exception ex)
+                    {
+
+                        throw;
+                    }
+
+                }
+                avgAdjX = avgAdjX / x.Count;
+                avgAdjY = avgAdjY / x.Count;
+                avgAdjZ = avgAdjZ / x.Count;
+
+                targetVertex.x = (targetVertex.x / 2.0f) + (avgAdjX / 2.0f);
+                targetVertex.y = (targetVertex.y / 2.0f) + (avgAdjY / 2.0f);
+                targetVertex.z = (targetVertex.z / 2.0f) + (avgAdjZ / 2.0f);
+            }
+        }
+        foreach (var item in newVerticesV2)
+        {
+            newVertices.Add(new Vector3(item.x, item.y, item.z));
+        }
+        
+    }
+
     public int VertexIndexOf(List<Vec3> vertices, Vec3 searchedVertex)
     {
         for (int i = 0; i < vertices.Count; i++)
