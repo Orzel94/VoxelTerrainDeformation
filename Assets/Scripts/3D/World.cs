@@ -17,16 +17,17 @@ public class World : MonoBehaviour
     public int worldYMultiplier = 2;
 
 
-
+    public float rBias;
+    public float rGain;
     public float exp;
     public float gain;
     public float offset; 
 
     public GameObject chunk;
     public Chunk[,,] chunks;  //Changed from public GameObject[,,] chunks;
-    public int chunkSize = 16;
+    public int chunkSize;
 
-    [Tooltip("size of siungle voxel - value must be power of 2")]
+    [Tooltip("size of single voxel - value must be power of 2")]
     public float voxelScale;
 
     // Start is called before the first frame update
@@ -35,8 +36,20 @@ public class World : MonoBehaviour
 
 
 
+
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
+
+    public void GenerateWorld()
+    {
         chunks = new Chunk[Mathf.FloorToInt(worldX / chunkSize),
-Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
+        Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
 
         for (int x = 0; x < chunks.GetLength(0); x++)
         {
@@ -46,30 +59,25 @@ Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
                 {
 
                     //Create a temporary Gameobject for the new chunk instead of using chunks[x,y,z]
-                    GameObject newChunk = Instantiate(chunk, new Vector3(x * chunkSize/2-0.5f,
-                     y * chunkSize, z * chunkSize/2-0.5f), new Quaternion(0, 0, 0, 0)) as GameObject;
+                    GameObject newChunk = Instantiate(chunk, new Vector3(x * chunkSize / 2 - 0.5f,
+                     y * chunkSize, z * chunkSize / 2 - 0.5f), new Quaternion(0, 0, 0, 0)) as GameObject;
 
                     //Now instead of using a temporary variable for the script assign it
                     //to chunks[x,y,z] and use it instead of the old \"newChunkScript\" 
                     chunks[x, y, z] = newChunk.GetComponent("Chunk") as Chunk;
                     chunks[x, y, z].worldGO = gameObject;
                     chunks[x, y, z].chunkSize = chunkSize;
-                    chunks[x, y, z].chunkX = x * chunkSize/2;
+                    chunks[x, y, z].chunkX = x * chunkSize / 2;
                     chunks[x, y, z].chunkY = y * chunkSize;
-                    chunks[x, y, z].chunkZ = z * chunkSize/2;
+                    chunks[x, y, z].chunkZ = z * chunkSize / 2;
                     chunks[x, y, z].voxelScale = voxelScale;
+                    chunks[x, y, z].rBias = rBias;
+                    chunks[x, y, z].rGain = rGain;
                     //chunks[x, y, z].GenerateTerrain();
 
                 }
             }
         }
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 
 }

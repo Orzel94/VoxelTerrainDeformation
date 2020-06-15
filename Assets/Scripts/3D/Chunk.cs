@@ -46,7 +46,8 @@ public class Chunk : MonoBehaviour
     public int chunkX;
     public int chunkY;
     public int chunkZ;
-
+    public float rBias;
+    public float rGain;
     private Vector2 tGrassTop = new Vector2(2, 1);
 
     public bool update;
@@ -125,8 +126,8 @@ public class Chunk : MonoBehaviour
 
         //Noise = new BillowNoise(4);
 
-        BiasObj = new Bias(Noise, -0.2f);
-        GainObj = new Gain(BiasObj, -0.2f);
+        BiasObj = new Bias(Noise, rBias);
+        GainObj = new Gain(BiasObj, rGain);
         terrainGenerationEnded = false;
         meshUpdateNeeded = true;
         mesh = GetComponent<MeshFilter>().mesh;
