@@ -69,18 +69,17 @@ public class guiScript : MonoBehaviour
     public void GenerateClicked()
     {
         var worldTMP = world.GetComponent("World") as World;
-        worldTMP.worldX = (int)X;
-        worldTMP.worldY = (int)Z;
-        worldTMP.worldZ = (int)Z;
+        worldTMP.worldX = int.Parse(XInput.text);
+        worldTMP.worldY = 64;
+        worldTMP.worldZ = int.Parse(ZInput.text);
 
-        worldTMP.rBias = rBias;
-        worldTMP.rGain = rGain;
-        worldTMP.rnExp = rnExp;
-        worldTMP.rnGain = rnGain;
-        worldTMP.rnOffset = rnOffset;
-        worldTMP.chunkSize = (int)chunkSize;
+        worldTMP.rBias = float.Parse(rBiasInput.text); ;
+        worldTMP.rGain = float.Parse(rGainInput.text); ;
+        worldTMP.rnExp = float.Parse(rnExpInput.text); ;
+        worldTMP.rnGain = float.Parse(rnGainInput.text); ;
+        worldTMP.rnOffset = float.Parse(rnOffsetInput.text);
+        worldTMP.chunkSize = int.Parse(chunkSizeInput.text);
         worldTMP.GenerateWorld();
-        ///ssss
-        Debug.Log("You have clicked the button!");
+        Debug.Log("Generation in progress");
     }
 }
