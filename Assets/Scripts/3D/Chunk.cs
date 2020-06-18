@@ -133,9 +133,9 @@ public class Chunk : MonoBehaviour
         mesh = GetComponent<MeshFilter>().mesh;
         col = GetComponent<MeshCollider>();
         world = worldGO.GetComponent("World") as World;
-        Noise.Exponent = world.exp;// 1.0f;
-        Noise.Gain = world.gain;// 1.2f;
-        Noise.Offset = world.offset;// 0.7f;
+        Noise.Exponent = world.rnExp;// 1.0f;
+        Noise.Gain = world.rnGain;// 1.2f;
+        Noise.Offset = world.rnOffset;// 0.7f;
         Task.Factory.StartNew(() =>
         {
             var stopwatch = new Stopwatch();

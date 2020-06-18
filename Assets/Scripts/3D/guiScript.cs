@@ -14,12 +14,12 @@ public class guiScript : MonoBehaviour
     //World parameters
     [Header("World parameters")]
     public float X;
-    public float Y;
+    public float Z;
     public float chunkSize;
     public float voxelScale;
 
     public InputField XInput;
-    public InputField YInput;
+    public InputField ZInput;
     public InputField chunkSizeInput;
     public InputField voxelScaleInput;
     //RidgeNoise parameters
@@ -54,7 +54,7 @@ public class guiScript : MonoBehaviour
 
         }
         XInput.text = X.ToString();
-        YInput.text = Y.ToString();
+        ZInput.text = Z.ToString();
         chunkSizeInput.text = chunkSize.ToString();
         voxelScaleInput.text = voxelScale.ToString();
 
@@ -68,7 +68,18 @@ public class guiScript : MonoBehaviour
 
     public void GenerateClicked()
     {
-        var worldTMP =world.GetComponent("World") as World;
+        var worldTMP = world.GetComponent("World") as World;
+        worldTMP.worldX = (int)X;
+        worldTMP.worldY = (int)Z;
+        worldTMP.worldZ = (int)Z;
+
+        worldTMP.rBias = rBias;
+        worldTMP.rGain = rGain;
+        worldTMP.rnExp = rnExp;
+        worldTMP.rnGain = rnGain;
+        worldTMP.rnOffset = rnOffset;
+        worldTMP.chunkSize = (int)chunkSize;
+        worldTMP.GenerateWorld();
         ///ssss
         Debug.Log("You have clicked the button!");
     }

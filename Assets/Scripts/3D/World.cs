@@ -19,9 +19,9 @@ public class World : MonoBehaviour
 
     public float rBias;
     public float rGain;
-    public float exp;
-    public float gain;
-    public float offset; 
+    public float rnExp;
+    public float rnGain;
+    public float rnOffset; 
 
     public GameObject chunk;
     public Chunk[,,] chunks;  //Changed from public GameObject[,,] chunks;
