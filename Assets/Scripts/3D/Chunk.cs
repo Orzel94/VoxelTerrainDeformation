@@ -68,6 +68,7 @@ public class Chunk : MonoBehaviour
 
     public int brushRadius;
     public int iterations;
+    private bool deformInprogress;
     public class Vec3
     {
         public float x;
@@ -118,10 +119,92 @@ public class Chunk : MonoBehaviour
         }
     }
 
+    internal void DeformGeometric(DefScript.Shape selectedShape, int size, double lnMultiplier, Vector3 position)
+    {
+        float x = Mathf.RoundToInt(position.x / world.voxelScale) * world.voxelScale;
+        float y = Mathf.RoundToInt(position.y / world.voxelScale) * world.voxelScale;
+        float z = Mathf.RoundToInt(position.z / world.voxelScale) * world.voxelScale;
+
+        int updateX = Mathf.FloorToInt(x / world.chunkSize);
+        int updateY = Mathf.FloorToInt(y / world.chunkSize);
+        int updateZ = Mathf.FloorToInt(z / world.chunkSize);
+
+        print("Updating: " + updateX + ", " + updateY + ", " + updateZ);
+        int voxXCenter = Mathf.FloorToInt((x - (updateX * world.chunkSize)) / world.voxelScale);
+        int voxYCenter = Mathf.FloorToInt(y / world.voxelScale);
+        int voxZCenter = Mathf.FloorToInt((z - (updateZ * world.chunkSize)) / world.voxelScale);
+        //choosen voxel on terrain
+        //int chunkX = Mathf.FloorToInt(x / world.chunkSize);
+        //int chunkY = Mathf.FloorToInt(y / world.chunkSize);
+        //int chunkZ = Mathf.FloorToInt(z / world.chunkSize);
+
+        for (int voxX = voxXCenter - size; voxX < voxXCenter + size; voxX++)
+        {
+            for (int voxZ = voxZCenter - size; voxZ < z + size; voxZ++)
+            {
+                if (voxX >= 0 && voxX < voxels.GetLength(0) && voxZ >= 0 && voxZ < voxels.GetLength(2))
+                {
+                    int xDist = Math.Abs(voxX - voxXCenter);
+                    int zDist = Math.Abs(voxZ - voxZCenter);
+
+                    double distance = Math.Sqrt((xDist * xDist) + (zDist * zDist));
+                    //if (distance==0)
+                    //{
+                    //    continue;
+                    //}
+                    if (distance <= size)
+                    {
+                        try
+                        {
+
+                            
+                            double ylog = Math.Log(size - distance+1) * lnMultiplier;
+                            int targetHeight = voxYCenter + Mathf.RoundToInt((float)ylog);
+                            for (int voxY = 0; voxY < (int)((world.worldY / world.voxelScale) - 1); voxY++)
+                            {
+                                if (voxels[voxX, voxY, voxZ] == VoxelTypeEnum.AIR && voxY <= targetHeight)
+                                {
+                                    voxels[voxX, voxY, voxZ] = VoxelTypeEnum.GRASS;
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+
+                            throw;
+                        }
+                    }
+                }
+            }
+        }
+        Task.Factory.StartNew(() =>
+        {
+            deformInprogress = true;
+            UnityEngine.Debug.Log($"deformed");
+            draw();
+            meshUpdateNeeded = true;
+            UnityEngine.Debug.Log($"drawn");
+        });
+
+            //                    int maxX = (brushRadius + x) < (int)(chunkSize / world.voxelScale) ? (brushRadius + x) : (int)(chunkSize / world.voxelScale);
+            //                    int maxY = (brushRadius + y) < (int)(world.worldY / world.voxelScale) ? (brushRadius + y) : (int)(world.worldY / world.voxelScale);
+            //                    int maxZ = (brushRadius + z) < (int)(chunkSize / world.voxelScale) ? (brushRadius + z) : (int)(chunkSize / world.voxelScale);
+            //                    int minX = (-brushRadius + x > 0) ? (-brushRadius + x) : 0;
+            //                    int minY = (-brushRadius + y > 0) ? (-brushRadius + y) : 0;
+            //                    int minZ = (-brushRadius + z > 0) ? (-brushRadius + z) : 0;
+            //                    for (int l = minX; l < maxX; l++)
+            //                    {
+            //                        for (int j = minY; j < maxY; j++)
+            //                        {
+            //                            for (int k = minZ; k < maxZ; k++)
+            //                            {
+            //if (Math.Sqrt(double.Parse((xDiff * xDiff + yDiff * yDiff + zDiff * zDiff).ToString())) <= brushRadius)
+        }
+
     // Start is called before the first frame update
     void Start()
     {
-
+        deformInprogress = false;
         Noise = new RidgeNoise(1);
 
         //Noise = new BillowNoise(4);
@@ -145,7 +228,7 @@ public class Chunk : MonoBehaviour
             terrainGenerationEnded = true;
 
             stopwatch.Stop();
-            UnityEngine.Debug.Log($"ElapsedMilliseconds: {stopwatch.ElapsedMilliseconds}");
+            UnityEngine.Debug.Log($"Elapsed seconds: {stopwatch.ElapsedMilliseconds/1000.0f}");
 
         });
         //Task.WhenAll()
@@ -158,6 +241,7 @@ public class Chunk : MonoBehaviour
         {
             UpdateMesh();
             meshUpdateNeeded = false;
+            deformInprogress = false;
         }
     }
 
@@ -501,7 +585,9 @@ public class Chunk : MonoBehaviour
 
     public void draw()
     {
-
+        newVerticesV2.Clear();
+        newTriangles.Clear();
+        newUV.Clear();
         try
         {
             //VoxelMesh[,,] voxelMesh = new VoxelMesh[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), (int)(chunkSize / world.voxelScale)];
@@ -692,6 +778,7 @@ public class Chunk : MonoBehaviour
                     }
                 }
             }
+            
             for (int c = 0; c < 5; c++)
             {
 
