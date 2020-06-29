@@ -12,7 +12,8 @@ public class DefScript : MonoBehaviour
     }
     public enum Shape
     {
-        Circle=0
+        Circle=0,
+        Square=1
     }
     public Button generateBtn;
     public GameObject world;
@@ -24,6 +25,7 @@ public class DefScript : MonoBehaviour
     //RidgeNoise parameters
     [Header("Shape parameters")]
     public Shape selectedShape;
+    public Dropdown shape;
     public InputField cSize;
     public InputField cMaxValue;
 
@@ -54,9 +56,9 @@ public class DefScript : MonoBehaviour
             {
                 Vector3 position = hit.point;
                 position += (hit.normal * -0.5f);
+                selectedShape = (Shape)this.shape.value;
 
-
-                if (selectedType == DefTypes.Geometric && selectedShape == Shape.Circle)
+                if (selectedType == DefTypes.Geometric)
                 {
                     worldTMP.DeformChunk(selectedShape, int.Parse(cSize.text), double.Parse(cMaxValue.text), position);
                 }

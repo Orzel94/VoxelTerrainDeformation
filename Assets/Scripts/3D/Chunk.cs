@@ -140,38 +140,54 @@ public class Chunk : MonoBehaviour
 
         for (int voxX = voxXCenter - size; voxX < voxXCenter + size; voxX++)
         {
-            for (int voxZ = voxZCenter - size; voxZ < z + size; voxZ++)
+            for (int voxZ = voxZCenter - size; voxZ < voxZCenter + size; voxZ++)
             {
                 if (voxX >= 0 && voxX < voxels.GetLength(0) && voxZ >= 0 && voxZ < voxels.GetLength(2))
                 {
                     int xDist = Math.Abs(voxX - voxXCenter);
                     int zDist = Math.Abs(voxZ - voxZCenter);
 
-                    double distance = Math.Sqrt((xDist * xDist) + (zDist * zDist));
-                    //if (distance==0)
-                    //{
-                    //    continue;
-                    //}
-                    if (distance <= size)
+                    if (selectedShape == DefScript.Shape.Circle)
                     {
-                        try
-                        {
 
-                            
-                            double ylog = Math.Log(size - distance+1) * lnMultiplier;
-                            int targetHeight = voxYCenter + Mathf.RoundToInt((float)ylog);
-                            for (int voxY = 0; voxY < (int)((world.worldY / world.voxelScale) - 1); voxY++)
+
+                        double distance = Math.Sqrt((xDist * xDist) + (zDist * zDist));
+                        //if (distance==0)
+                        //{
+                        //    continue;
+                        //}
+                        if (distance <= size)
+                        {
+                            try
                             {
-                                if (voxels[voxX, voxY, voxZ] == VoxelTypeEnum.AIR && voxY <= targetHeight)
+
+
+                                double ylog = Math.Log(size - distance + 1) * lnMultiplier;
+                                int targetHeight = voxYCenter + Mathf.RoundToInt((float)ylog);
+                                for (int voxY = 0; voxY < (int)((world.worldY / world.voxelScale) - 1); voxY++)
                                 {
-                                    voxels[voxX, voxY, voxZ] = VoxelTypeEnum.GRASS;
+                                    if (voxels[voxX, voxY, voxZ] == VoxelTypeEnum.AIR && voxY <= targetHeight)
+                                    {
+                                        voxels[voxX, voxY, voxZ] = VoxelTypeEnum.GRASS;
+                                    }
                                 }
                             }
-                        }
-                        catch (Exception ex)
-                        {
+                            catch (Exception ex)
+                            {
 
-                            throw;
+                                throw;
+                            }
+                        }
+                    }
+                    else if (selectedShape==DefScript.Shape.Square)
+                    {
+                        int targetHeight = voxYCenter + Mathf.RoundToInt(((size - Math.Abs(xDist + zDist) / 2)/2 + 1) * Convert.ToSingle(lnMultiplier));
+                        for (int voxY = 0; voxY < (int)((world.worldY / world.voxelScale) - 1); voxY++)
+                        {
+                            if (voxels[voxX, voxY, voxZ] == VoxelTypeEnum.AIR && voxY <= targetHeight)
+                            {
+                                voxels[voxX, voxY, voxZ] = VoxelTypeEnum.GRASS;
+                            }
                         }
                     }
                 }
