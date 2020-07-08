@@ -11,6 +11,8 @@ using Unity.IL2CPP.CompilerServices;
 using System.Linq;
 using System.CodeDom;
 using System.Security.Cryptography.X509Certificates;
+using System.IO;
+using System.Collections.Concurrent;
 
 public enum VoxelTypeEnum
 {
@@ -23,7 +25,7 @@ public enum VoxelTypeEnum
 [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
 public class Chunk : MonoBehaviour
 {
-
+    private ConcurrentQueue<string> logs;
     private List<Vector3> newVertices = new List<Vector3>();
     private List<Vec3> newVerticesV2 = new List<Vec3>();
     private List<int> newTriangles = new List<int>();
@@ -69,6 +71,8 @@ public class Chunk : MonoBehaviour
     public int brushRadius;
     public int iterations;
     private bool deformInprogress;
+
+    private Vector3[] vm;
     public class Vec3
     {
         public float x;
@@ -119,8 +123,40 @@ public class Chunk : MonoBehaviour
         }
     }
 
+    public async Task WriteLogAsync(string fileName)
+    {
+        string log;
+        try
+        {
+            var path = Path.Combine(fileName);
+            File.AppendAllText(path, $"------------------||App started||{DateTime.Now.ToString()}||-----------------");
+            using (StreamWriter writer = File.AppendText(path))
+            {
+                while (true)
+                {
+                    if (logs.TryDequeue(out log))
+                    {
+
+                        await writer.WriteLineAsync(log);
+
+                    }
+
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+    }
+
     internal void DeformGeometric(DefScript.Shape selectedShape, int size, double lnMultiplier, Vector3 position)
     {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+
         float x = Mathf.RoundToInt(position.x / world.voxelScale) * world.voxelScale;
         float y = Mathf.RoundToInt(position.y / world.voxelScale) * world.voxelScale;
         float z = Mathf.RoundToInt(position.z / world.voxelScale) * world.voxelScale;
@@ -193,6 +229,8 @@ public class Chunk : MonoBehaviour
                 }
             }
         }
+        stopwatch.Stop();
+        logs.Enqueue($"Voxel deformation; {stopwatch.ElapsedMilliseconds};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
         Task.Factory.StartNew(() =>
         {
             deformInprogress = true;
@@ -220,6 +258,7 @@ public class Chunk : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        logs = new ConcurrentQueue<string>();
         deformInprogress = false;
         Noise = new RidgeNoise(1);
 
@@ -237,6 +276,13 @@ public class Chunk : MonoBehaviour
         Noise.Offset = world.rnOffset;// 0.7f;
         Task.Factory.StartNew(() =>
         {
+            UnityEngine.Debug.Log($"saving thread started");
+
+            WriteLogAsync($"logs-{DateTime.Now.ToString("dd-MM-yyyy")}.csv");
+
+        });
+        Task.Factory.StartNew(() =>
+        {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -244,9 +290,12 @@ public class Chunk : MonoBehaviour
             terrainGenerationEnded = true;
 
             stopwatch.Stop();
-            UnityEngine.Debug.Log($"Elapsed seconds: {stopwatch.ElapsedMilliseconds/1000.0f}");
+            UnityEngine.Debug.Log($"Elapsed seconds: {stopwatch.ElapsedMilliseconds/1000.0f};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
 
         });
+
+
+        
         //Task.WhenAll()
     }
 
@@ -263,9 +312,11 @@ public class Chunk : MonoBehaviour
 
     void UpdateMesh()
     {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
         mesh.Clear();
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        mesh.vertices = newVertices.ToArray();
+        mesh.vertices = vm;//newVertices.ToArray();
         var xxx = mesh.vertices[0];
         var xxx2 = newVertices[0];
         Debug.Log($"vertices count {newVertices.Count}; list max size {newVertices.Capacity}; chunkX: {chunkX}  ChunkZ: {chunkZ}");
@@ -285,6 +336,8 @@ public class Chunk : MonoBehaviour
         newTriangles.Clear();
         Debug.Log($"333vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         faceCount = 0;
+        stopwatch.Stop();
+        logs.Enqueue($"render: {stopwatch.ElapsedMilliseconds};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
     }
 
     VoxelTypeEnum Block(int x, int y, int z)
@@ -303,6 +356,8 @@ public class Chunk : MonoBehaviour
 
     public void GenerateTerrain()
     {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
         voxels = new VoxelTypeEnum[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), /** worldYMultiplier,*/ (int)(chunkSize / world.voxelScale)];
         for (int x = 0; x < (int)(chunkSize / world.voxelScale); x++)
         {
@@ -344,6 +399,8 @@ public class Chunk : MonoBehaviour
                 }
             }
         }
+        stopwatch.Stop();
+        logs.Enqueue($"terrain generation: {stopwatch.ElapsedMilliseconds};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
         //Task.Factory.StartNew(() =>
         //{
         draw();
@@ -604,6 +661,9 @@ public class Chunk : MonoBehaviour
         newVerticesV2.Clear();
         newTriangles.Clear();
         newUV.Clear();
+
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
         try
         {
             //VoxelMesh[,,] voxelMesh = new VoxelMesh[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), (int)(chunkSize / world.voxelScale)];
@@ -794,46 +854,62 @@ public class Chunk : MonoBehaviour
                     }
                 }
             }
-            
-            for (int c = 0; c < 5; c++)
-            {
+
+            stopwatch.Stop();
+            logs.Enqueue($"Marching Cubes; {stopwatch.ElapsedMilliseconds};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
+
+            stopwatch = new Stopwatch();
+            stopwatch.Start();
+            //for (int c = 0; c < 5; c++)
+            //{
 
 
-                for (int i = 0; i < newVerticesV2.Count; i++)
-                {
-                    float avgAdjX = 0;
-                    float avgAdjY = 0;
-                    float avgAdjZ = 0;
-                    var x = FindAdjacentVertices(i);
-                    foreach (var item in x)
-                    {
-                        try
-                        {
-                            var vert = newVerticesV2[newTriangles[item]];
-                            avgAdjX += vert.x;
-                            avgAdjY += vert.y;
-                            avgAdjZ += vert.z;
-                        }
-                        catch (Exception ex)
-                        {
+            //    for (int i = 0; i < newVerticesV2.Count; i++)
+            //    {
+            //        float avgAdjX = 0;
+            //        float avgAdjY = 0;
+            //        float avgAdjZ = 0;
+            //        var x = FindAdjacentVertices(i);
+            //        foreach (var item in x)
+            //        {
+            //            try
+            //            {
+            //                var vert = newVerticesV2[newTriangles[item]];
+            //                avgAdjX += vert.x;
+            //                avgAdjY += vert.y;
+            //                avgAdjZ += vert.z;
+            //            }
+            //            catch (Exception ex)
+            //            {
 
-                            throw;
-                        }
+            //                throw;
+            //            }
 
-                    }
-                    avgAdjX = avgAdjX / x.Count;
-                    avgAdjY = avgAdjY / x.Count;
-                    avgAdjZ = avgAdjZ / x.Count;
-                    var targetVertex = newVerticesV2[i];
-                    targetVertex.x = (targetVertex.x / 2.0f) + (avgAdjX / 2.0f);
-                    targetVertex.y = (targetVertex.y / 2.0f) + (avgAdjY / 2.0f);
-                    targetVertex.z = (targetVertex.z / 2.0f) + (avgAdjZ / 2.0f);
-                }
-            }
+            //        }
+            //        avgAdjX = avgAdjX / x.Count;
+            //        avgAdjY = avgAdjY / x.Count;
+            //        avgAdjZ = avgAdjZ / x.Count;
+            //        var targetVertex = newVerticesV2[i];
+            //        targetVertex.x = (targetVertex.x / 2.0f) + (avgAdjX / 2.0f);
+            //        targetVertex.y = (targetVertex.y / 2.0f) + (avgAdjY / 2.0f);
+            //        targetVertex.z = (targetVertex.z / 2.0f) + (avgAdjZ / 2.0f);
+            //    }
+            //}
             foreach (var item in newVerticesV2)
             {
                 newVertices.Add(new Vector3(item.x, item.y, item.z));
             }
+            var vs = newVertices.ToArray();
+            vm = newVertices.ToArray();
+            var tr = newTriangles.ToArray();
+            for (int i = 0; i < 5; i++)
+                //vm = SmoothFilter.laplacianFilter(vm, tr);
+                vm = SmoothFilter.hcFilter(vs, vm, tr, 0.0f, 0.5f);
+
+
+            stopwatch.Stop();
+            logs.Enqueue($"Smoothing; {stopwatch.ElapsedMilliseconds};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
+
             //SmoothDataSet(ref voxelMesh, /*this.brushRadius*/5, /*this.iterations*/1);
 
             //////////////////////////////////////////////
@@ -972,6 +1048,8 @@ public class Chunk : MonoBehaviour
 
     public List<int> FindAdjacentVertices(int vertexIndex)
     {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
         List<int> adjVertIndexes = new List<int>();
         try
         {
@@ -1004,6 +1082,9 @@ public class Chunk : MonoBehaviour
 
             throw;
         }
+        stopwatch.Stop();
+        //logs.Enqueue($"finding adjacent vertices; {stopwatch.ElapsedMilliseconds};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
+
         return adjVertIndexes;
     }
 

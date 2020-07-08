@@ -72,6 +72,7 @@ public class guiScript : MonoBehaviour
         worldTMP.worldX = int.Parse(XInput.text);
         worldTMP.worldY = 64;
         worldTMP.worldZ = int.Parse(ZInput.text);
+        worldTMP.voxelScale = float.Parse(voxelScaleInput.text);
 
         worldTMP.rBias = float.Parse(rBiasInput.text); ;
         worldTMP.rGain = float.Parse(rGainInput.text); ;

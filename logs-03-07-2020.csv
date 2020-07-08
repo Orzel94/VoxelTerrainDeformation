@@ -1,0 +1,4 @@
+------------------||App started||03.07.2020 10:03:23||-----------------terrain generation: 6;  Terrain size (X/Y/Z); 64/64/64; voxel scale: 2
+Marching Cubes; 20;  Terrain size (X/Y/Z); 64/64/64; voxel scale: 2
+Smoothing; 561;  Terrain size (X/Y/Z); 64/64/64; voxel scale: 2
+render: 2;  Terrain size (X/Y/Z); 64/64/64; voxel scale: 2
