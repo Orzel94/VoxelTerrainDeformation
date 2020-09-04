@@ -81,7 +81,7 @@ public class Chunk : MonoBehaviour
         public Vec3()
         {
         }
-            public Vec3(float X, float Y, float Z)
+        public Vec3(float X, float Y, float Z)
         {
             x = X;
             y = Y;
@@ -104,9 +104,9 @@ public class Chunk : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = new Color(1, 1, 0, 0.75F);
-        for (int x = 0; x < (int)(chunkSize / world.voxelScale); x++)
+        for (int x = 0; x < (int)(chunkSize / world.voxelScale) + 1; x++)
         {
-            for (int z = 0; z < (int)(chunkSize / world.voxelScale); z++)
+            for (int z = 0; z < (int)(chunkSize / world.voxelScale) + 1; z++)
             {
                 for (int y = (int)((world.worldY / world.voxelScale) - 1); y > 0; y--)
                 {
@@ -114,7 +114,7 @@ public class Chunk : MonoBehaviour
                     if (Block(x, y, z) != VoxelTypeEnum.AIR && Block(x, y + 1, z) == VoxelTypeEnum.AIR)
                     {
                         //Block above is air
-                        Vector3 position = new Vector3(2*chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, 2*chunkZ + z * world.voxelScale);
+                        Vector3 position = new Vector3(2 * chunkX + x * world.voxelScale, chunkY + y * world.voxelScale, 2 * chunkZ + z * world.voxelScale);
                         Gizmos.DrawWireSphere(position, 0.1f);
                         break;
                     }
@@ -215,9 +215,9 @@ public class Chunk : MonoBehaviour
                             }
                         }
                     }
-                    else if (selectedShape==DefScript.Shape.Square)
+                    else if (selectedShape == DefScript.Shape.Square)
                     {
-                        int targetHeight = voxYCenter + Mathf.RoundToInt(((size - Math.Abs(xDist + zDist) / 2)/2 + 1) * Convert.ToSingle(lnMultiplier));
+                        int targetHeight = voxYCenter + Mathf.RoundToInt(((size - Math.Abs(xDist + zDist) / 2) / 2 + 1) * Convert.ToSingle(lnMultiplier));
                         for (int voxY = 0; voxY < (int)((world.worldY / world.voxelScale) - 1); voxY++)
                         {
                             if (voxels[voxX, voxY, voxZ] == VoxelTypeEnum.AIR && voxY <= targetHeight)
@@ -240,20 +240,20 @@ public class Chunk : MonoBehaviour
             UnityEngine.Debug.Log($"drawn");
         });
 
-            //                    int maxX = (brushRadius + x) < (int)(chunkSize / world.voxelScale) ? (brushRadius + x) : (int)(chunkSize / world.voxelScale);
-            //                    int maxY = (brushRadius + y) < (int)(world.worldY / world.voxelScale) ? (brushRadius + y) : (int)(world.worldY / world.voxelScale);
-            //                    int maxZ = (brushRadius + z) < (int)(chunkSize / world.voxelScale) ? (brushRadius + z) : (int)(chunkSize / world.voxelScale);
-            //                    int minX = (-brushRadius + x > 0) ? (-brushRadius + x) : 0;
-            //                    int minY = (-brushRadius + y > 0) ? (-brushRadius + y) : 0;
-            //                    int minZ = (-brushRadius + z > 0) ? (-brushRadius + z) : 0;
-            //                    for (int l = minX; l < maxX; l++)
-            //                    {
-            //                        for (int j = minY; j < maxY; j++)
-            //                        {
-            //                            for (int k = minZ; k < maxZ; k++)
-            //                            {
-            //if (Math.Sqrt(double.Parse((xDiff * xDiff + yDiff * yDiff + zDiff * zDiff).ToString())) <= brushRadius)
-        }
+        //                    int maxX = (brushRadius + x) < (int)(chunkSize / world.voxelScale) ? (brushRadius + x) : (int)(chunkSize / world.voxelScale);
+        //                    int maxY = (brushRadius + y) < (int)(world.worldY / world.voxelScale) ? (brushRadius + y) : (int)(world.worldY / world.voxelScale);
+        //                    int maxZ = (brushRadius + z) < (int)(chunkSize / world.voxelScale) ? (brushRadius + z) : (int)(chunkSize / world.voxelScale);
+        //                    int minX = (-brushRadius + x > 0) ? (-brushRadius + x) : 0;
+        //                    int minY = (-brushRadius + y > 0) ? (-brushRadius + y) : 0;
+        //                    int minZ = (-brushRadius + z > 0) ? (-brushRadius + z) : 0;
+        //                    for (int l = minX; l < maxX; l++)
+        //                    {
+        //                        for (int j = minY; j < maxY; j++)
+        //                        {
+        //                            for (int k = minZ; k < maxZ; k++)
+        //                            {
+        //if (Math.Sqrt(double.Parse((xDiff * xDiff + yDiff * yDiff + zDiff * zDiff).ToString())) <= brushRadius)
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -290,12 +290,12 @@ public class Chunk : MonoBehaviour
             terrainGenerationEnded = true;
 
             stopwatch.Stop();
-            UnityEngine.Debug.Log($"Elapsed seconds: {stopwatch.ElapsedMilliseconds/1000.0f};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
+            UnityEngine.Debug.Log($"Elapsed seconds: {stopwatch.ElapsedMilliseconds / 1000.0f};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
 
         });
 
 
-        
+
         //Task.WhenAll()
     }
 
@@ -316,7 +316,7 @@ public class Chunk : MonoBehaviour
         stopwatch.Start();
         mesh.Clear();
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        mesh.vertices = vm;//newVertices.ToArray();
+        mesh.vertices = newVertices.ToArray();
         var xxx = mesh.vertices[0];
         var xxx2 = newVertices[0];
         Debug.Log($"vertices count {newVertices.Count}; list max size {newVertices.Capacity}; chunkX: {chunkX}  ChunkZ: {chunkZ}");
@@ -340,7 +340,7 @@ public class Chunk : MonoBehaviour
         logs.Enqueue($"render: {stopwatch.ElapsedMilliseconds};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
     }
 
-    VoxelTypeEnum Block(int x, int y, int z)
+    VoxelTypeEnum Block(int x, int y, int z, bool calculatedNeighbourValue = false)
     {
         try
         {
@@ -348,6 +348,29 @@ public class Chunk : MonoBehaviour
         }
         catch (Exception ex)
         {
+            if (calculatedNeighbourValue)
+            {
+                int stone = PerlinNoise(2 * chunkX + x * world.voxelScale, 0, 2 * chunkZ + z * world.voxelScale, 200, (int)(world.worldY / world.voxelScale) /** world.worldYMultiplier*/, 4.2f);// + (int)(world.worldY / world.voxelScale);
+                int dirt = PerlinNoise(2 * chunkX + x * world.voxelScale, 100, 2 * chunkZ + z * world.voxelScale, 200, world.worldY, 0) + 1;// + (int)(world.worldY / world.voxelScale); //Added +1 to make sure minimum grass height is 1
+
+                if (y <= stone)
+                {
+                    return VoxelTypeEnum.STONE;
+                }
+                else if (y <= dirt + stone)
+                {
+                    return VoxelTypeEnum.GRASS;
+                }
+                else if (y == 0)
+                {
+                    return VoxelTypeEnum.STONE;
+                }
+                else 
+                {
+                    return VoxelTypeEnum.AIR;
+                }
+
+            }
             return VoxelTypeEnum.AIR;
         }
 
@@ -358,10 +381,10 @@ public class Chunk : MonoBehaviour
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        voxels = new VoxelTypeEnum[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), /** worldYMultiplier,*/ (int)(chunkSize / world.voxelScale)];
-        for (int x = 0; x < (int)(chunkSize / world.voxelScale); x++)
+        voxels = new VoxelTypeEnum[(int)(chunkSize / world.voxelScale) + 1, (int)(world.worldY / world.voxelScale), /** worldYMultiplier,*/ (int)(chunkSize / world.voxelScale) + 1];
+        for (int x = 0; x < (int)(chunkSize / world.voxelScale) + 1; x++)
         {
-            for (int z = 0; z < (int)(chunkSize / world.voxelScale); z++)
+            for (int z = 0; z < (int)(chunkSize / world.voxelScale) + 1; z++)
             {
                 int stone = PerlinNoise(2 * chunkX + x * world.voxelScale, 0, 2 * chunkZ + z * world.voxelScale, 200, (int)(world.worldY / world.voxelScale) /** world.worldYMultiplier*/, 4.2f);// + (int)(world.worldY / world.voxelScale);
                 //stone += PerlinNoise(x, 300, z, 20, 4, 1.5f) + 10;
@@ -414,11 +437,11 @@ public class Chunk : MonoBehaviour
     {
         try
         {
-            for (int x = 0; x < chunkSize / world.voxelScale; x++)
+            for (int x = 0; x < chunkSize / world.voxelScale + 1; x++)
             {
                 for (int y = 0; y < world.worldY / world.voxelScale; y++)
                 {
-                    for (int z = 0; z < chunkSize / world.voxelScale; z++)
+                    for (int z = 0; z < chunkSize / world.voxelScale + 1; z++)
                     {
                         VoxelTypeEnum currentVoxel = Block(x, y, z);
 
@@ -667,9 +690,9 @@ public class Chunk : MonoBehaviour
         try
         {
             //VoxelMesh[,,] voxelMesh = new VoxelMesh[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), (int)(chunkSize / world.voxelScale)];
-            for (int z = 0; z < chunkSize / world.voxelScale - 1; z++)
+            for (int z = 0; z < chunkSize / world.voxelScale; z++)
             {
-                for (int x = 0; x < chunkSize / world.voxelScale - 1; x++)
+                for (int x = 0; x < chunkSize / world.voxelScale; x++)
                 {
                     for (int y = 0; y < world.worldY / world.voxelScale - 1; y++)
                     {
@@ -806,7 +829,7 @@ public class Chunk : MonoBehaviour
                                             int existingIndex = VertexIndexOf(newVerticesV2, verts[vertIndex]);
                                             //int jVal;
                                             //bool exist = vertDic.TryGetValue(vertIndex, out jVal);
-                                            if (existingIndex!=-1)
+                                            if (existingIndex != -1)
                                             {
                                                 ///////
                                                 //voxel.triangles.Add(faceCount + jVal);
@@ -899,19 +922,65 @@ public class Chunk : MonoBehaviour
             {
                 newVertices.Add(new Vector3(item.x, item.y, item.z));
             }
-            var vs = newVertices.ToArray();
-            vm = newVertices.ToArray();
-            var tr = newTriangles.ToArray();
+            //var vs = newVertices.ToArray();
+            //vm = newVertices.ToArray();
+            //var tr = newTriangles.ToArray();
             //for (int i = 0; i < 5; i++)
-                //vm = SmoothFilter.laplacianFilter(vm, tr);
-                //vm = SmoothFilter.hcFilter(vs, vm, tr, 0.0f, 0.5f);
+            //    vm = SmoothFilter.laplacianFilter(vm, tr);
+            //vm = SmoothFilter.hcFilter(vs, vm, tr, 0.0f, 0.5f);
 
 
             stopwatch.Stop();
             logs.Enqueue($"Smoothing; {stopwatch.ElapsedMilliseconds};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
 
-           // SmoothDataSet(ref vm, /*this.brushRadius*/5, /*this.iterations*/1);
+            //SmoothDataSet(ref vm, /*this.brushRadius*/5, /*this.iterations*/1);
+            for (int t = 0; t < 10; t++)
+            {
 
+
+                int ddd = 0;
+                for (int i = 0; i < newVertices.Count; i++)
+                {
+                    var vert = newVertices[i];
+                    if (vert.x == chunkX + chunkSize || vert.x == chunkX || vert.z == chunkZ + chunkSize || vert.z == chunkZ)
+                    {
+                        ddd++;
+                    }
+                    else
+                    {
+                        var adjacent = FindAdjacentVertices(i);
+                        float avgAdjY = 0.0f;
+                        float avgAdjX = 0.0f;
+                        float avgAdjZ = 0.0f;
+
+                        foreach (var item in adjacent)
+                        {
+                            try
+                            {
+                                var adjVert = newVerticesV2[newTriangles[item]];
+                                avgAdjY += adjVert.y;
+                                avgAdjX += adjVert.x;
+                                avgAdjZ += adjVert.z;
+                            }
+                            catch (Exception ex)
+                            {
+
+                                throw;
+                            }
+
+                        }
+                        avgAdjY = avgAdjY / adjacent.Count;
+                        //newVertices[i].y = (vert.y / 2.0f) + (avgAdjY / 2.0f);
+                        avgAdjX = avgAdjX / adjacent.Count;
+                        //newVertices[i].x = (vert.x / 2.0f) + (avgAdjX / 2.0f);
+                        avgAdjZ = avgAdjZ / adjacent.Count;
+                        //newVertices[i].z = (vert.z / 2.0f) + (avgAdjZ / 2.0f);
+                        newVertices[i] = new Vector3((vert.x / 2.0f) + (avgAdjX / 2.0f), (vert.y / 2.0f) + (avgAdjY / 2.0f), (vert.z / 2.0f) + (avgAdjZ / 2.0f));
+                    }
+
+                }
+            }
+            int dagfa = 4;
             //////////////////////////////////////////////
             //int brushRadius = 3;
             //int iterations = 2;
@@ -1030,7 +1099,7 @@ public class Chunk : MonoBehaviour
         for (int i = 0; i < vertices.Count; i++)
         {
             var vertex = vertices[i];
-            if (vertex.x==searchedVertex.x && vertex.y == searchedVertex.y && vertex.z == searchedVertex.z)
+            if (vertex.x == searchedVertex.x && vertex.y == searchedVertex.y && vertex.z == searchedVertex.z)
             {
                 return i;
             }
@@ -1054,28 +1123,28 @@ public class Chunk : MonoBehaviour
         try
         {
 
-       
-        
-        List<int> v = newTriangles.Select((b, i) => b == vertexIndex ? i : -1).Where(i => i != -1).ToList();
-        foreach (var item in v)
-        {
-            var x = item % 3;
-            if (x==0)
+
+
+            List<int> v = newTriangles.Select((b, i) => b == vertexIndex ? i : -1).Where(i => i != -1).ToList();
+            foreach (var item in v)
             {
-                adjVertIndexes.Add(item + 1);
-                adjVertIndexes.Add(item + 2);
+                var x = item % 3;
+                if (x == 0)
+                {
+                    adjVertIndexes.Add(item + 1);
+                    adjVertIndexes.Add(item + 2);
+                }
+                else if (x == 1)
+                {
+                    adjVertIndexes.Add(item - 1);
+                    adjVertIndexes.Add(item + 1);
+                }
+                else
+                {
+                    adjVertIndexes.Add(item - 1);
+                    adjVertIndexes.Add(item - 2);
+                }
             }
-            else if (x==1)
-            {
-                adjVertIndexes.Add(item - 1);
-                adjVertIndexes.Add(item + 1);
-            }
-            else
-            {
-                adjVertIndexes.Add(item - 1);
-                adjVertIndexes.Add(item - 2);
-            }
-        }
         }
         catch (Exception ex)
         {
