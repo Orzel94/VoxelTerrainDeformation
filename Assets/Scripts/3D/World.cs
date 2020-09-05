@@ -47,6 +47,7 @@ public class World : MonoBehaviour
 
     }
 
+
     public void GenerateWorld()
     {
         if (chunksObjects != null && chunksObjects.Count>0)
@@ -91,7 +92,11 @@ public class World : MonoBehaviour
 
     public void DeformChunk(DefScript.Shape selectedShape, int size, double lnMultiplier, Vector3 position)
     {
-        chunks[0, 0, 0].DeformGeometric(selectedShape, size, lnMultiplier, position);
+        //chunks[0, 0, 0].DeformGeometric(selectedShape, size, lnMultiplier, position);
+        foreach (var item in chunks)
+        {
+            item.DeformGeometric(selectedShape, size, lnMultiplier, position);
+        }
     }
 
 }

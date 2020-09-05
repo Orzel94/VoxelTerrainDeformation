@@ -365,7 +365,7 @@ public class Chunk : MonoBehaviour
                 {
                     return VoxelTypeEnum.STONE;
                 }
-                else 
+                else
                 {
                     return VoxelTypeEnum.AIR;
                 }
@@ -395,7 +395,7 @@ public class Chunk : MonoBehaviour
                 {
                     try
                     {
-                        if (y==2)
+                        if (y == 2)
                         {
                             voxels[x, y, z] = VoxelTypeEnum.AIR;
                             continue;
@@ -695,10 +695,30 @@ public class Chunk : MonoBehaviour
         stopwatch.Start();
         try
         {
-            //VoxelMesh[,,] voxelMesh = new VoxelMesh[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), (int)(chunkSize / world.voxelScale)];
-            for (int z = 0; z < chunkSize / world.voxelScale; z++)
+            int zB = 0;
+            if (chunkZ / (world.chunkSize / 2) == 0)
             {
-                for (int x = 0; x < chunkSize / world.voxelScale; x++)
+                zB--;
+            }
+            int addZ = 0;
+            if (chunkZ / (world.chunkSize / 2) == world.chunks.GetLength(2) - 1)
+            {
+                addZ++;
+            }
+            //VoxelMesh[,,] voxelMesh = new VoxelMesh[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), (int)(chunkSize / world.voxelScale)];
+            for (int z = zB; z < chunkSize / world.voxelScale+addZ; z++)
+            {
+                int xB = 0;
+                if (chunkX / (world.chunkSize / 2) == 0)
+                {
+                    xB--;
+                }
+                int addX = 0;
+                if (chunkX / (world.chunkSize / 2) == world.chunks.GetLength(0)-1)
+                {
+                    addX++;
+                }
+                for (int x = xB; x < chunkSize / world.voxelScale + addX; x++)
                 {
                     for (int y = 0; y < world.worldY / world.voxelScale - 1; y++)
                     {
