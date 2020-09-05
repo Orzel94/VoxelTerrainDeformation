@@ -395,6 +395,12 @@ public class Chunk : MonoBehaviour
                 {
                     try
                     {
+                        if (y==2)
+                        {
+                            voxels[x, y, z] = VoxelTypeEnum.AIR;
+                            continue;
+                        }
+
                         if (y <= stone)
                         {
                             voxels[x, y, z] = VoxelTypeEnum.STONE;
