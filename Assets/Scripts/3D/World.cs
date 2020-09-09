@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using CoherentNoise.Generation;
 using CoherentNoise.Generation.Displacement;
@@ -31,17 +33,54 @@ public class World : MonoBehaviour
     public List<GameObject> chunksObjects;
     public int chunkSize;
 
+    public ConcurrentQueue<string> logs;
+
     [Tooltip("size of single voxel - value must be power of 2")]
     public float voxelScale;
 
     // Start is called before the first frame update
     void Start()
     {
+        logs = new ConcurrentQueue<string>();
+        Task.Factory.StartNew(() =>
+        {
+            UnityEngine.Debug.Log($"saving thread started");
+
+            WriteLogAsync($"logs-{DateTime.Now.ToString("dd-MM-yyyy")}.csv");
+
+        });
 
 
 
 
+    }
 
+    public async Task WriteLogAsync(string fileName)
+    {
+        string log;
+        try
+        {
+            var path = Path.Combine(fileName);
+            File.AppendAllText(path, $"------------------||App started||{DateTime.Now.ToString()}||-----------------");
+            using (StreamWriter writer = File.AppendText(path))
+            {
+                while (true)
+                {
+                    if (logs.TryDequeue(out log))
+                    {
+
+                        await writer.WriteLineAsync(log);
+
+                    }
+
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
     }
 
     // Update is called once per frame
@@ -63,6 +102,8 @@ public class World : MonoBehaviour
         chunksObjects = new List<GameObject>();
         chunks = new Chunk[Mathf.FloorToInt(worldX / chunkSize),
         Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
+
+        logs.Enqueue($"||--------------New Terrain generation; Terrain size (X/Y/Z); {worldX}/{worldY}/{worldZ}; voxel scale; {voxelScale}; chunk size; {chunkSize}; voxel count; {worldX*worldY*worldZ/voxelScale};");
 
         for (int x = 0; x < chunks.GetLength(0); x++)
         {
@@ -398,6 +439,7 @@ public class World : MonoBehaviour
         }
         stopwatch.Stop();
 
+        logs.Enqueue($"||------Terrain deformed; Deformation time [ms]; {stopwatch.ElapsedMilliseconds}; Chunks affected; {usedChunks.Count} ;");
         foreach (var item in usedChunks)
         {
             Task.Factory.StartNew(() =>
