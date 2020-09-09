@@ -25,6 +25,7 @@ public enum VoxelTypeEnum
 [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
 public class Chunk : MonoBehaviour
 {
+    public Vector3 ChunkIndex { get; set; }
     private ConcurrentQueue<string> logs;
     private List<Vector3> newVertices = new List<Vector3>();
     private List<Vec3> newVerticesV2 = new List<Vec3>();
@@ -70,7 +71,7 @@ public class Chunk : MonoBehaviour
 
     public int brushRadius;
     public int iterations;
-    private bool deformInprogress;
+    public bool deformInprogress;
 
     private Vector3[] vm;
     public class Vec3
@@ -350,25 +351,41 @@ public class Chunk : MonoBehaviour
         {
             if (calculatedNeighbourValue)
             {
-                int stone = PerlinNoise(2 * chunkX + x * world.voxelScale, 0, 2 * chunkZ + z * world.voxelScale, 200, (int)(world.worldY / world.voxelScale) /** world.worldYMultiplier*/, 4.2f);// + (int)(world.worldY / world.voxelScale);
-                int dirt = PerlinNoise(2 * chunkX + x * world.voxelScale, 100, 2 * chunkZ + z * world.voxelScale, 200, world.worldY, 0) + 1;// + (int)(world.worldY / world.voxelScale); //Added +1 to make sure minimum grass height is 1
+                if (x<0)
+                {
+                    return world.chunks[(int)ChunkIndex.x - 1, (int)ChunkIndex.y, (int)ChunkIndex.z].Block((int)(x + (chunkSize / voxelScale)), y, z, true);
+                }
+                else if (x >= chunkSize)
+                {
+                    return world.chunks[(int)ChunkIndex.x + 1, (int)ChunkIndex.y, (int)ChunkIndex.z].Block((int)(x - (chunkSize / voxelScale)), y, z, true);
+                }
+                else if (z<0)
+                {
+                    return world.chunks[(int)ChunkIndex.x, (int)ChunkIndex.y, (int)ChunkIndex.z - 1].Block(x, y, (int)(z + (chunkSize / voxelScale)), true);
+                }
+                else if (z >= chunkSize)
+                {
+                    return world.chunks[(int)ChunkIndex.x, (int)ChunkIndex.y, (int)ChunkIndex.z + 1].Block(x, y, (int)(z - (chunkSize / voxelScale)), true);
+                }
+                //int stone = PerlinNoise(2 * chunkX + x * world.voxelScale, 0, 2 * chunkZ + z * world.voxelScale, 200, (int)(world.worldY / world.voxelScale) /** world.worldYMultiplier*/, 4.2f);// + (int)(world.worldY / world.voxelScale);
+                //int dirt = PerlinNoise(2 * chunkX + x * world.voxelScale, 100, 2 * chunkZ + z * world.voxelScale, 200, world.worldY, 0) + 1;// + (int)(world.worldY / world.voxelScale); //Added +1 to make sure minimum grass height is 1
 
-                if (y <= stone)
-                {
-                    return VoxelTypeEnum.STONE;
-                }
-                else if (y <= dirt + stone)
-                {
-                    return VoxelTypeEnum.GRASS;
-                }
-                else if (y == 0)
-                {
-                    return VoxelTypeEnum.STONE;
-                }
-                else
-                {
-                    return VoxelTypeEnum.AIR;
-                }
+                //if (y <= stone)
+                //{
+                //    return VoxelTypeEnum.STONE;
+                //}
+                //else if (y <= dirt + stone)
+                //{
+                //    return VoxelTypeEnum.GRASS;
+                //}
+                //else if (y == 0)
+                //{
+                //    return VoxelTypeEnum.STONE;
+                //}
+                //else
+                //{
+                //    return VoxelTypeEnum.AIR;
+                //}
 
             }
             return VoxelTypeEnum.AIR;
@@ -902,6 +919,20 @@ public class Chunk : MonoBehaviour
                         /* gjřr lookup-tabellen klar til neste runde */
                     }
                 }
+            }
+            Vector2 texturePos2 = tGrass;
+            try
+            {
+                if (newUV.Count != newVerticesV2.Count)
+                {
+                    for (int i = newUV.Count; i < newVerticesV2.Count; i++)
+                    {
+                        newUV.Add(new Vector2(tUnit * texturePos2.x + tUnit, tUnit * texturePos2.y));
+                    }
+                }
+            }catch(Exception ex)
+            {
+                throw;
             }
 
             stopwatch.Stop();

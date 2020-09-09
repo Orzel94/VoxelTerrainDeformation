@@ -1,0 +1,31 @@
+------------------||App started||06.09.2020 01:04:10||-----------------terrain generation: 10;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Marching Cubes; 22411;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Smoothing; 0;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+render: 4;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+------------------||App started||06.09.2020 01:07:57||-----------------terrain generation: 16;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Marching Cubes; 18091;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Smoothing; 0;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+render: 10;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+------------------||App started||06.09.2020 01:11:49||-----------------------------------||App started||06.09.2020 01:11:50||-----------------------------------||App started||06.09.2020 01:11:50||-----------------------------------||App started||06.09.2020 01:11:50||-----------------------------------||App started||06.09.2020 01:11:50||-----------------terrain generation: 481;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Marching Cubes; 14167;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Smoothing; 1;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+render: 4;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+------------------||App started||06.09.2020 01:17:04||-----------------terrain generation: 10;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Marching Cubes; 16538;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Smoothing; 1;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+render: 4;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+------------------||App started||06.09.2020 01:25:07||-----------------terrain generation: 11;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Marching Cubes; 14989;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Smoothing; 0;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+render: 3;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Marching Cubes; 3557;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Smoothing; 0;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+render: 4;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+------------------||App started||06.09.2020 01:53:50||-----------------------------------||App started||06.09.2020 01:53:50||-----------------terrain generation: 11;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Marching Cubes; 112;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Smoothing; 0;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+render: 4;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+------------------||App started||06.09.2020 02:51:00||-----------------terrain generation: 11;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Marching Cubes; 15804;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+Smoothing; 1;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
+render: 9;  Terrain size (X/Y/Z); 128/64/128; voxel scale: 2
