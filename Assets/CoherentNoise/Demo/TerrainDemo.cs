@@ -28,7 +28,7 @@ public class TerrainDemo : MonoBehaviour
     {
         if (!Terrain1 || !Terrain2)
         {
-            Debug.LogError("Terrains not set!!");
+            //Debug.LogError("Terrains not set!!");
             enabled = false;
         }
 

@@ -26,7 +26,7 @@ public enum VoxelTypeEnum
 public class Chunk : MonoBehaviour
 {
     public Vector3 ChunkIndex { get; set; }
-    
+
     private List<Vector3> newVertices = new List<Vector3>();
     private List<Vec3> newVerticesV2 = new List<Vec3>();
     private List<int> newTriangles = new List<int>();
@@ -57,7 +57,7 @@ public class Chunk : MonoBehaviour
 
     public VoxelTypeEnum[,,] voxels;
     public float voxelScale;
-    private bool terrainGenerationEnded;
+    public bool terrainGenerationEnded;
     public bool meshUpdateNeeded;
 
     public RidgeNoise Noise;
@@ -72,7 +72,7 @@ public class Chunk : MonoBehaviour
     public int brushRadius;
     public int iterations;
     public bool deformInprogress;
-
+    private bool chunkCreated = false;
     private Vector3[] vm;
     public class Vec3
     {
@@ -209,10 +209,10 @@ public class Chunk : MonoBehaviour
         Task.Factory.StartNew(() =>
         {
             deformInprogress = true;
-            UnityEngine.Debug.Log($"deformed");
+            //UnityEngine.//Debug.Log($"deformed");
             draw();
             meshUpdateNeeded = true;
-            UnityEngine.Debug.Log($"drawn");
+            //UnityEngine.//Debug.Log($"drawn");
         });
 
         //                    int maxX = (brushRadius + x) < (int)(chunkSize / world.voxelScale) ? (brushRadius + x) : (int)(chunkSize / world.voxelScale);
@@ -250,22 +250,53 @@ public class Chunk : MonoBehaviour
         Noise.Gain = world.rnGain;// 1.2f;
         Noise.Offset = world.rnOffset;// 0.7f;
 
-        Task.Factory.StartNew(() =>
-        {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+        chunkCreated = true;
+        //Task.Factory.StartNew(() =>
+        //{
+        //    var stopwatch = new Stopwatch();
+        //    stopwatch.Start();
 
-            GenerateTerrain();
-            terrainGenerationEnded = true;
+        //    GenerateTerrain();
+        //    terrainGenerationEnded = true;
 
-            stopwatch.Stop();
-            UnityEngine.Debug.Log($"Elapsed seconds: {stopwatch.ElapsedMilliseconds / 1000.0f};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
+        //    stopwatch.Stop();
+        //    //UnityEngine.//Debug.Log($"Elapsed seconds: {stopwatch.ElapsedMilliseconds / 1000.0f};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
 
-        });
+        //});
 
 
 
         //Task.WhenAll()
+    }
+    public Task GenAsync()
+    {
+        return Task.Factory.StartNew(() =>
+        {
+            while (true)
+            {
+                if (!chunkCreated)
+                {
+                    continue;
+                }
+                try
+                {
+
+                    var stopwatch = new Stopwatch();
+                    stopwatch.Start();
+
+                    GenerateTerrain();
+                    terrainGenerationEnded = true;
+
+                    stopwatch.Stop();
+                    world.logs.Enqueue($"Elapsed seconds: {stopwatch.ElapsedMilliseconds};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+                break;
+            }
+        });
     }
 
     // Update is called once per frame
@@ -288,13 +319,13 @@ public class Chunk : MonoBehaviour
         mesh.vertices = newVertices.ToArray();
         var xxx = mesh.vertices[0];
         var xxx2 = newVertices[0];
-        Debug.Log($"vertices count {newVertices.Count}; list max size {newVertices.Capacity}; chunkX: {chunkX}  ChunkZ: {chunkZ}");
-        Debug.Log($"vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        //Debug.Log($"vertices count {newVertices.Count}; list max size {newVertices.Capacity}; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        //Debug.Log($"vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         mesh.uv = newUV.ToArray();
         mesh.triangles = newTriangles.ToArray();
-        Debug.Log($"111vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        //Debug.Log($"111vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         mesh.Optimize();
-        Debug.Log($"222vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        //Debug.Log($"222vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         mesh.RecalculateNormals();
 
         col.sharedMesh = null;
@@ -303,7 +334,7 @@ public class Chunk : MonoBehaviour
         newVertices.Clear();
         newUV.Clear();
         newTriangles.Clear();
-        Debug.Log($"333vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
+        //Debug.Log($"333vertices count {mesh.vertexCount}; list max size--------; chunkX: {chunkX}  ChunkZ: {chunkZ}");
         faceCount = 0;
         stopwatch.Stop();
         //world.logs.Enqueue($"render: {stopwatch.ElapsedMilliseconds};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
@@ -319,7 +350,7 @@ public class Chunk : MonoBehaviour
         {
             if (calculatedNeighbourValue)
             {
-                if (x<0)
+                if (x < 0)
                 {
                     return world.chunks[(int)ChunkIndex.x - 1, (int)ChunkIndex.y, (int)ChunkIndex.z].Block((int)(x + (chunkSize / voxelScale)), y, z, true);
                 }
@@ -327,7 +358,7 @@ public class Chunk : MonoBehaviour
                 {
                     return world.chunks[(int)ChunkIndex.x + 1, (int)ChunkIndex.y, (int)ChunkIndex.z].Block((int)(x - (chunkSize / voxelScale)), y, z, true);
                 }
-                else if (z<0)
+                else if (z < 0)
                 {
                     return world.chunks[(int)ChunkIndex.x, (int)ChunkIndex.y, (int)ChunkIndex.z - 1].Block(x, y, (int)(z + (chunkSize / voxelScale)), true);
                 }
@@ -374,7 +405,7 @@ public class Chunk : MonoBehaviour
                 int stone = PerlinNoise(2 * chunkX + x * world.voxelScale, 0, 2 * chunkZ + z * world.voxelScale, 200, (int)(world.worldY / world.voxelScale) /** world.worldYMultiplier*/, 4.2f);// + (int)(world.worldY / world.voxelScale);
                 //stone += PerlinNoise(x, 300, z, 20, 4, 1.5f) + 10;
                 int dirt = PerlinNoise(2 * chunkX + x * world.voxelScale, 100, 2 * chunkZ + z * world.voxelScale, 200, world.worldY, 0) + 1;// + (int)(world.worldY / world.voxelScale); //Added +1 to make sure minimum grass height is 1
-                //Debug.Log($"stone: {stone} , x: {x}, z: {z}");
+                ////Debug.Log($"stone: {stone} , x: {x}, z: {z}");
                 //for (int y = (int)(worldY / voxelScale); y < (int)(worldY / voxelScale) * worldYMultiplier; y++)
                 for (int y = 0; y < (int)(world.worldY / world.voxelScale); y++)
                 {
@@ -414,9 +445,9 @@ public class Chunk : MonoBehaviour
             }
         }
         stopwatch.Stop();
-        world.logs.Enqueue($"|| Chunk[{ChunkIndex.x},{ChunkIndex.y},{ChunkIndex.z}]; terrain generation [ms]; {stopwatch.ElapsedMilliseconds}; voxel count; {voxels.GetLength(0) * voxels.GetLength(1) * voxels.GetLength(2)}; voxel scale; {world.voxelScale};");
+        world.logs.Enqueue($"|| Chunk[{ChunkIndex.x},{ChunkIndex.y},{ChunkIndex.z}]; terrain generation [ms]; {stopwatch.ElapsedMilliseconds}; voxel count; {voxels.GetLength(0) * voxels.GetLength(1) * voxels.GetLength(2)}; Chunk size; {chunkSize}; voxel scale; {world.voxelScale};");
 
-       // world.logs.Enqueue($"terrain generation: {stopwatch.ElapsedMilliseconds};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
+        // world.logs.Enqueue($"terrain generation: {stopwatch.ElapsedMilliseconds};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
         //Task.Factory.StartNew(() =>
         //{
         draw();
@@ -694,7 +725,7 @@ public class Chunk : MonoBehaviour
                 addZ++;
             }
             //VoxelMesh[,,] voxelMesh = new VoxelMesh[(int)(chunkSize / world.voxelScale), (int)(world.worldY / world.voxelScale), (int)(chunkSize / world.voxelScale)];
-            for (int z = zB; z < chunkSize / world.voxelScale+addZ; z++)
+            for (int z = zB; z < chunkSize / world.voxelScale + addZ; z++)
             {
                 int xB = 0;
                 if (chunkX / (world.chunkSize / 2) == 0)
@@ -702,7 +733,7 @@ public class Chunk : MonoBehaviour
                     xB--;
                 }
                 int addX = 0;
-                if (chunkX / (world.chunkSize / 2) == world.chunks.GetLength(0)-1)
+                if (chunkX / (world.chunkSize / 2) == world.chunks.GetLength(0) - 1)
                 {
                     addX++;
                 }
@@ -901,13 +932,14 @@ public class Chunk : MonoBehaviour
                         newUV.Add(new Vector2(tUnit * texturePos2.x + tUnit, tUnit * texturePos2.y));
                     }
                 }
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw;
             }
 
             stopwatch.Stop();
-            world.logs.Enqueue($"|| Chunk[{ChunkIndex.x},{ChunkIndex.y},{ChunkIndex.z}]; Marching Cubes [ms]; {stopwatch.ElapsedMilliseconds}; voxel count; {voxels.GetLength(0)* voxels.GetLength(1)*voxels.GetLength(2)}; vertices count; {newVerticesV2.Count}; triangles count; {newTriangles.Count/3};");
+            world.logs.Enqueue($"|| Chunk[{ChunkIndex.x},{ChunkIndex.y},{ChunkIndex.z}]; Marching Cubes [ms]; {stopwatch.ElapsedMilliseconds}; voxel count; {voxels.GetLength(0) * voxels.GetLength(1) * voxels.GetLength(2)};Chunk size; {chunkSize}; vertices count; {newVerticesV2.Count}; triangles count; {newTriangles.Count / 3};");
 
             stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -958,7 +990,7 @@ public class Chunk : MonoBehaviour
             //vm = SmoothFilter.hcFilter(vs, vm, tr, 0.0f, 0.5f);
 
 
-            
+
             //world.logs.Enqueue($"Smoothing; {stopwatch.ElapsedMilliseconds};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");
 
             //SmoothDataSet(ref vm, /*this.brushRadius*/5, /*this.iterations*/1);
@@ -1009,7 +1041,7 @@ public class Chunk : MonoBehaviour
                 }
             }
             stopwatch.Stop();
-            world.logs.Enqueue($"|| Chunk[{ChunkIndex.x},{ChunkIndex.y},{ChunkIndex.z}]; Laplatian smoothing[ms]; {stopwatch.ElapsedMilliseconds}; voxel count; {voxels.GetLength(0) * voxels.GetLength(1) * voxels.GetLength(2)} ; vertices count; {newVerticesV2.Count}; triangles count; {newTriangles.Count / 3} ;");
+            world.logs.Enqueue($"|| Chunk[{ChunkIndex.x},{ChunkIndex.y},{ChunkIndex.z}]; Laplatian smoothing[ms]; {stopwatch.ElapsedMilliseconds}; voxel count; {voxels.GetLength(0) * voxels.GetLength(1) * voxels.GetLength(2)} ;Chunk size; {chunkSize};vertices count; {newVerticesV2.Count}; triangles count; {newTriangles.Count / 3} ;");
 
             //////////////////////////////////////////////
             //int brushRadius = 3;

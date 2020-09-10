@@ -81,6 +81,6 @@ public class guiScript : MonoBehaviour
         worldTMP.rnOffset = float.Parse(rnOffsetInput.text);
         worldTMP.chunkSize = int.Parse(chunkSizeInput.text);
         worldTMP.GenerateWorld();
-        Debug.Log("Generation in progress");
+        //Debug.Log("Generation in progress");
     }
 }

@@ -1,0 +1,69 @@
+------------------||App started||10.09.2020 21:05:41||-----------------||--------------New Terrain generation; Terrain size (X/Y/Z); 128/64/128; voxel scale;2; chunk size;128; voxel count;524288;;
+------------------||App started||10.09.2020 21:07:04||-----------------||--------------New Terrain generation; Terrain size (X/Y/Z); 128/64/128; voxel scale;2; chunk size;128; voxel count;524288;;
+------------------||App started||10.09.2020 21:07:53||-----------------||--------------New Terrain generation; Terrain size (X/Y/Z); 128/64/128; voxel scale;2; chunk size;128; voxel count;524288;;
+------------------||App started||10.09.2020 21:11:02||-----------------||--------------New Terrain generation; Terrain size (X/Y/Z); 128/64/128; voxel scale;2; chunk size;128; voxel count;524288;;
+------------------||App started||10.09.2020 21:13:32||-----------------||--------------New Terrain generation; Terrain size (X/Y/Z); 128/64/128; voxel scale;2; chunk size;32; voxel count;524288;;
+------------------||App started||10.09.2020 21:14:44||-----------------||--------------New Terrain generation; Terrain size (X/Y/Z); 128/64/128; voxel scale;2; chunk size;32; voxel count;524288;;
+------------------||App started||10.09.2020 21:16:37||-----------------||--------------New Terrain generation; Terrain size (X/Y/Z); 128/64/128; voxel scale;2; chunk size;32; voxel count;524288;;
+------------------||App started||10.09.2020 21:24:36||-----------------||--------------New Terrain generation; Terrain size (X/Y/Z); 128/64/128; voxel scale;2; chunk size;32; voxel count;524288;;
+------------------||App started||10.09.2020 21:38:22||-----------------||--------------New Terrain generation; Terrain size (X/Y/Z); 128/64/128; voxel scale;2; chunk size;32; voxel count;524288;;
+||-----WHOLE Terrain generated;Elapsed seconds: 42,525;  Terrain size (X/Y/Z); 128/64/128; Chunk size;32; voxel scale: 2;;;;
+------------------||App started||10.09.2020 21:40:12||-----------------||--------------New Terrain generation; Terrain size (X/Y/Z); 128/64/128; voxel scale;2; chunk size;32; voxel count;524288;;
+||-----WHOLE Terrain generated;Elapsed seconds: 0,006;  Terrain size (X/Y/Z); 128/64/128; Chunk size;32; voxel scale: 2;;;;
+------------------||App started||10.09.2020 21:41:43||-----------------||--------------New Terrain generation; Terrain size (X/Y/Z); 128/64/128; voxel scale;2; chunk size;32; voxel count;524288;;
+||-----WHOLE Terrain generated;Elapsed seconds: 226,594;  Terrain size (X/Y/Z); 128/64/128; Chunk size;32; voxel scale: 2;;;;
+------------------||App started||10.09.2020 21:45:46||-----------------||--------------New Terrain generation; Terrain size (X/Y/Z); 128/64/128; voxel scale;2; chunk size;32; voxel count;524288;;
+||-----WHOLE Terrain generated;Elapsed seconds: 115,253;  Terrain size (X/Y/Z); 128/64/128; Chunk size;32; voxel scale: 2;;;;
+------------------||App started||10.09.2020 21:49:15||-----------------||--------------New Terrain generation; Terrain size (X/Y/Z); 128/64/128; voxel scale;2; chunk size;32; voxel count;524288;;
+|| Chunk[0,0,0]; terrain generation [ms];6; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[0,0,2]; terrain generation [ms];7844; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[0,0,1]; terrain generation [ms];10794; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[1,0,1]; terrain generation [ms];8708; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[0,0,3]; terrain generation [ms];10552; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[1,0,2]; terrain generation [ms];8902; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[1,0,0]; terrain generation [ms];10699; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[1,0,3]; terrain generation [ms];8942; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[3,0,1]; terrain generation [ms];4232; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[3,0,3]; terrain generation [ms];4594; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[3,0,2]; terrain generation [ms];4938; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[2,0,1]; terrain generation [ms];5242; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[3,0,0]; terrain generation [ms];5581; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[2,0,2]; terrain generation [ms];5948; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[2,0,3]; terrain generation [ms];6307; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[2,0,0]; terrain generation [ms];6703; voxel count;9248; Chunk size;32; voxel scale;2;;
+|| Chunk[1,0,2]; Marching Cubes [ms];9237; voxel count;9248;Chunk size;32; vertices count;880; triangles count;1592
+|| Chunk[2,0,2]; Marching Cubes [ms];6968; voxel count;9248;Chunk size;32; vertices count;924; triangles count;1640
+|| Chunk[1,0,1]; Marching Cubes [ms];10115; voxel count;9248;Chunk size;32; vertices count;950; triangles count;1718
+|| Chunk[2,0,1]; Marching Cubes [ms];10016; voxel count;9248;Chunk size;32; vertices count;1116; triangles count;2010
+|| Chunk[0,0,2]; Marching Cubes [ms];16194; voxel count;9248;Chunk size;32; vertices count;972; triangles count;1796
+|| Chunk[1,0,3]; Marching Cubes [ms];13755; voxel count;9248;Chunk size;32; vertices count;969; triangles count;1760
+|| Chunk[0,0,1]; Marching Cubes [ms];16342; voxel count;9248;Chunk size;32; vertices count;904; triangles count;1644
+|| Chunk[3,0,2]; Marching Cubes [ms];13383; voxel count;9248;Chunk size;32; vertices count;1066; triangles count;1948
+|| Chunk[2,0,3]; Marching Cubes [ms];12049; voxel count;9248;Chunk size;32; vertices count;1010; triangles count;1842
+|| Chunk[1,0,0]; Marching Cubes [ms];15335; voxel count;9248;Chunk size;32; vertices count;1174; triangles count;2144
+|| Chunk[3,0,1]; Marching Cubes [ms];14973; voxel count;9248;Chunk size;32; vertices count;1193; triangles count;2190
+|| Chunk[2,0,0]; Marching Cubes [ms];12932; voxel count;9248;Chunk size;32; vertices count;1343; triangles count;2472
+|| Chunk[3,0,3]; Marching Cubes [ms];16479; voxel count;9248;Chunk size;32; vertices count;1018; triangles count;1891
+|| Chunk[0,0,3]; Marching Cubes [ms];18179; voxel count;9248;Chunk size;32; vertices count;1071; triangles count;1995
+|| Chunk[3,0,0]; Marching Cubes [ms];16090; voxel count;9248;Chunk size;32; vertices count;1413; triangles count;2657
+|| Chunk[0,0,0]; Marching Cubes [ms];29944; voxel count;9248;Chunk size;32; vertices count;1567; triangles count;2969
+|| Chunk[1,0,2]; Laplatian smoothing[ms];14908; voxel count;9248;Chunk size;32;vertices count;880; triangles count;1592
+|| Chunk[2,0,2]; Laplatian smoothing[ms];19587; voxel count;9248;Chunk size;32;vertices count;924; triangles count;1640
+|| Chunk[0,0,1]; Laplatian smoothing[ms];14924; voxel count;9248;Chunk size;32;vertices count;904; triangles count;1644
+|| Chunk[1,0,1]; Laplatian smoothing[ms];20785; voxel count;9248;Chunk size;32;vertices count;950; triangles count;1718
+|| Chunk[1,0,3]; Laplatian smoothing[ms];16696; voxel count;9248;Chunk size;32;vertices count;969; triangles count;1760
+|| Chunk[0,0,2]; Laplatian smoothing[ms];17464; voxel count;9248;Chunk size;32;vertices count;972; triangles count;1796
+|| Chunk[2,0,3]; Laplatian smoothing[ms];17162; voxel count;9248;Chunk size;32;vertices count;1010; triangles count;1842
+|| Chunk[3,0,3]; Laplatian smoothing[ms];15066; voxel count;9248;Chunk size;32;vertices count;1018; triangles count;1891
+|| Chunk[3,0,2]; Laplatian smoothing[ms];18762; voxel count;9248;Chunk size;32;vertices count;1066; triangles count;1948
+|| Chunk[0,0,3]; Laplatian smoothing[ms];16324; voxel count;9248;Chunk size;32;vertices count;1071; triangles count;1995
+|| Chunk[2,0,1]; Laplatian smoothing[ms];22940; voxel count;9248;Chunk size;32;vertices count;1116; triangles count;2010
+|| Chunk[1,0,0]; Laplatian smoothing[ms];22117; voxel count;9248;Chunk size;32;vertices count;1174; triangles count;2144
+|| Chunk[3,0,1]; Laplatian smoothing[ms];22356; voxel count;9248;Chunk size;32;vertices count;1193; triangles count;2190
+|| Chunk[2,0,0]; Laplatian smoothing[ms];23848; voxel count;9248;Chunk size;32;vertices count;1343; triangles count;2472
+|| Chunk[3,0,0]; Laplatian smoothing[ms];23722; voxel count;9248;Chunk size;32;vertices count;1413; triangles count;2657
+|| Chunk[0,0,0]; Laplatian smoothing[ms];25423; voxel count;9248;Chunk size;32;vertices count;1567; triangles count;2969
+||-----WHOLE Terrain generated;Elapsed seconds: 69,508;  Terrain size (X/Y/Z); 128/64/128; Chunk size;32; voxel scale: 2;;;;
+||------Terrain deformed; Deformation time [ms];1022; Chunks affected;1;;;;;;
+|| Chunk[1,0,3]; Marching Cubes [ms];1264; voxel count;9248;Chunk size;32; vertices count;1071; triangles count;1968
+|| Chunk[1,0,3]; Laplatian smoothing[ms];3084; voxel count;9248;Chunk size;32;vertices count;1071; triangles count;1968

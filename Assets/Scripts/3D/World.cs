@@ -44,8 +44,8 @@ public class World : MonoBehaviour
         logs = new ConcurrentQueue<string>();
         Task.Factory.StartNew(() =>
         {
-            UnityEngine.Debug.Log($"saving thread started");
-
+            ////UnityEngine.//Debug.Log($"saving thread started");
+           // Console.WriteLine("dsafdsafafsddasf");
             WriteLogAsync($"logs-{DateTime.Now.ToString("dd-MM-yyyy")}.csv");
 
         });
@@ -103,8 +103,10 @@ public class World : MonoBehaviour
         chunks = new Chunk[Mathf.FloorToInt(worldX / chunkSize),
         Mathf.FloorToInt(1), Mathf.FloorToInt(worldZ / chunkSize)];
 
-        logs.Enqueue($"||--------------New Terrain generation; Terrain size (X/Y/Z); {worldX}/{worldY}/{worldZ}; voxel scale; {voxelScale}; chunk size; {chunkSize}; voxel count; {worldX*worldY*worldZ/voxelScale};");
-
+        logs.Enqueue($"||--------------New Terrain generation; Terrain size (X/Y/Z); {worldX}/{worldY}/{worldZ}; voxel scale; {voxelScale}; chunk size; {chunkSize}; voxel count; {worldX * worldY * worldZ / voxelScale};");
+        var tasks = new List<Task>();
+        var stopwatchforTerrain = new Stopwatch();
+        stopwatchforTerrain.Start();
         for (int x = 0; x < chunks.GetLength(0); x++)
         {
             for (int y = 0; y < 1; y++)
@@ -129,10 +131,44 @@ public class World : MonoBehaviour
                     chunks[x, y, z].rGain = rGain;
                     chunks[x, y, z].ChunkIndex = new Vector3(x, y, z);
                     //chunks[x, y, z].GenerateTerrain();
+                    var pX = x;
+                    var pY = y;
+                    var pZ = z;
+                    var chunkTMP = chunks[x, y, z];
+                    
+                    //tasks.Add(Task.Factory.StartNew(() =>
+                    //{
+                    //    var c = chunkTMP;
+                    //    var stopwatch = new Stopwatch();
+                    //    stopwatch.Start();
+                    //try {
+                    //        c.GenerateTerrain();
+                    //        c.terrainGenerationEnded = true;
+                    //} catch(Exception ex)
+                    //    {
+                    //        throw;
+                    //    }
+
+                    //    stopwatch.Stop();
+                    //    logs.Enqueue($"|| Chunk whole terrain generated; Elapsed seconds: {stopwatch.ElapsedMilliseconds / 1000.0f};  Terrain size (X/Y/Z); {worldX}/{worldY}/{worldZ};Chunk size; {chunkSize}; voxel scale: {voxelScale}");
+
+                    //}));
+                    try { 
+                    tasks.Add(chunkTMP.GenAsync());
+                    }
+                    catch (Exception ex)
+                    {
+                        throw;
+                    }
 
                 }
             }
         }
+        Task.Factory.ContinueWhenAll(tasks.ToArray(), wordCountTasks => {
+            stopwatchforTerrain.Stop();
+            logs.Enqueue($"||-----WHOLE Terrain generated;Elapsed seconds; {stopwatchforTerrain.ElapsedMilliseconds};  Terrain size (X/Y/Z); {worldX}/{worldY}/{worldZ}; Chunk size; {chunkSize}; voxel scale: {voxelScale}");
+
+        });
     }
 
     public void DeformChunk(DefScript.Shape selectedShape, int size, double lnMultiplier, Vector3 position)
@@ -326,13 +362,13 @@ public class World : MonoBehaviour
                                         else
                                         {
                                             chunks[updateX + ChunkXOffset, updateY, updateZ + ChunkZOffset].voxels[voxXindex, voxY, voxZindex] = VoxelTypeEnum.GRASS;
-                                            if (ChunkXOffset==1&&voxZindex==arrayMaxIndex)
+                                            if (ChunkXOffset == 1 && voxZindex == arrayMaxIndex)
                                             {
-                                                chunks[updateX + ChunkXOffset, updateY, updateZ + ChunkZOffset+1].voxels[voxXindex, voxY, 0] = VoxelTypeEnum.GRASS;
+                                                chunks[updateX + ChunkXOffset, updateY, updateZ + ChunkZOffset + 1].voxels[voxXindex, voxY, 0] = VoxelTypeEnum.GRASS;
                                             }
                                             if (ChunkZOffset == 1 && voxXindex == arrayMaxIndex)
                                             {
-                                                chunks[updateX + ChunkXOffset+1, updateY, updateZ + ChunkZOffset].voxels[0, voxY, voxZindex] = VoxelTypeEnum.GRASS;
+                                                chunks[updateX + ChunkXOffset + 1, updateY, updateZ + ChunkZOffset].voxels[0, voxY, voxZindex] = VoxelTypeEnum.GRASS;
                                             }
 
                                             if (ChunkXOffset == -1 && voxZindex == 0)
@@ -445,10 +481,10 @@ public class World : MonoBehaviour
             Task.Factory.StartNew(() =>
             {
                 chunks[(int)item.x, (int)item.y, (int)item.z].deformInprogress = true;
-                UnityEngine.Debug.Log($"deformed");
+                //UnityEngine.//Debug.Log($"deformed");
                 chunks[(int)item.x, (int)item.y, (int)item.z].draw();
                 chunks[(int)item.x, (int)item.y, (int)item.z].meshUpdateNeeded = true;
-                UnityEngine.Debug.Log($"drawn");
+                //UnityEngine.//Debug.Log($"drawn");
             });
         }
         //logs.Enqueue($"Voxel deformation; {stopwatch.ElapsedMilliseconds};  Terrain size (X/Y/Z); {world.worldX}/{world.worldY}/{world.worldZ}; voxel scale: {world.voxelScale}");

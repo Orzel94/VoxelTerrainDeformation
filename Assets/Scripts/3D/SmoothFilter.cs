@@ -34,7 +34,7 @@ public class SmoothFilter : MonoBehaviour
 				dy = 0.0f;
 				dz = 0.0f;
 
-				//Debug.Log("Vertex Index Length = "+vertexIndexes.Length);
+				////Debug.Log("Vertex Index Length = "+vertexIndexes.Length);
 				// Add the vertices and divide by the number of vertices
 				for (int j = 0; j < adjacentVertices.Count; j++)
 				{

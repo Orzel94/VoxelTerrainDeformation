@@ -65,20 +65,20 @@ public class MeshUtils : MonoBehaviour
 							if (isVertexExist(adjacentV, v[v1]) == false)
 							{
 								adjacentV.Add(v[v1]);
-								//Debug.Log("Adjacent vertex index = " + v1);
+								////Debug.Log("Adjacent vertex index = " + v1);
 							}
 
 							if (isVertexExist(adjacentV, v[v2]) == false)
 							{
 								adjacentV.Add(v[v2]);
-								//Debug.Log("Adjacent vertex index = " + v2);
+								////Debug.Log("Adjacent vertex index = " + v2);
 							}
 							marker = false;
 						}
 					}
 			}
 
-		//Debug.Log("Faces Found = " + facecount);
+		////Debug.Log("Faces Found = " + facecount);
 
 		return adjacentV;
 	}
@@ -144,21 +144,21 @@ public class MeshUtils : MonoBehaviour
 							{
 								adjacentV.Add(v[v1]);
 								adjacentIndexes.Add(v1);
-								//Debug.Log("Adjacent vertex index = " + v1);
+								////Debug.Log("Adjacent vertex index = " + v1);
 							}
 
 							if (isVertexExist(adjacentV, v[v2]) == false)
 							{
 								adjacentV.Add(v[v2]);
 								adjacentIndexes.Add(v2);
-								//Debug.Log("Adjacent vertex index = " + v2);
+								////Debug.Log("Adjacent vertex index = " + v2);
 							}
 							marker = false;
 						}
 					}
 			}
 
-		//Debug.Log("Faces Found = " + facecount);
+		////Debug.Log("Faces Found = " + facecount);
 
 		return adjacentIndexes;
 	}
