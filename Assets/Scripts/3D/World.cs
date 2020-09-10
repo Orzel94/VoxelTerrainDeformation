@@ -32,9 +32,9 @@ public class World : MonoBehaviour
     public Chunk[,,] chunks;  //Changed from public GameObject[,,] chunks;
     public List<GameObject> chunksObjects;
     public int chunkSize;
-
+    String path;
     public ConcurrentQueue<string> logs;
-
+    
     [Tooltip("size of single voxel - value must be power of 2")]
     public float voxelScale;
 
@@ -42,16 +42,18 @@ public class World : MonoBehaviour
     void Start()
     {
         logs = new ConcurrentQueue<string>();
-        Task.Factory.StartNew(() =>
-        {
-            ////UnityEngine.//Debug.Log($"saving thread started");
-           // Console.WriteLine("dsafdsafafsddasf");
-            WriteLogAsync($"logs-{DateTime.Now.ToString("dd-MM-yyyy")}.csv");
+        //Task.Factory.StartNew(() =>
+        //{
+        //    ////UnityEngine.//Debug.Log($"saving thread started");
+        //   // Console.WriteLine("dsafdsafafsddasf");
+        //    WriteLogAsync($"logs-{DateTime.Now.ToString("dd-MM-yyyy")}.csv");
 
-        });
+        //});
 
+        //path = Path.Combine($"logs-{DateTime.Now.ToString("dd-MM-yyyy")}.csv");
+        path = $"C:/unityLogs/logs-{DateTime.Now.ToString("dd-MM-yyyy")}.csv";
 
-
+        File.AppendAllText(path, $"------------------||App started||{DateTime.Now.ToString()}||-----------------");
 
     }
 
@@ -60,7 +62,7 @@ public class World : MonoBehaviour
         string log;
         try
         {
-            var path = Path.Combine(fileName);
+            path = Path.Combine(Application.dataPath, fileName);
             File.AppendAllText(path, $"------------------||App started||{DateTime.Now.ToString()}||-----------------");
             using (StreamWriter writer = File.AppendText(path))
             {
@@ -87,6 +89,21 @@ public class World : MonoBehaviour
     void Update()
     {
 
+    }
+
+    private void FixedUpdate()
+    {
+        using (StreamWriter writer = File.AppendText(path))
+        {
+            string log;
+            if (logs.TryDequeue(out log))
+                {
+
+                    writer.WriteLine(log);
+
+                }
+
+        }
     }
 
 
